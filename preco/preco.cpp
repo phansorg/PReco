@@ -1,5 +1,4 @@
-﻿#include <iostream>
-#include <fstream>
+﻿#include <fstream>
 #include <filesystem>
 
 #include <nlohmann/json.hpp>
@@ -11,37 +10,39 @@ using json = nlohmann::json;
 // settings
 // ========================================================
 nlohmann::json settings;
-const char* SETTINGS_FILE_NAME = "settings.json";
-const char* LOGS_PATH = "LOGS_PATH";
+const char* settings_file_name = "settings.json";
+
+const char* log_path = "log_path";
 
 // ========================================================
 // functions
 // ========================================================
-void initSettings() {
+void init_settings() {
 
     /*
-    if (std::filesystem::exists(SETTINGS_FILE_NAME)) {
-        std::ifstream ifs(SETTINGS_FILE_NAME);
+    if (std::filesystem::exists(settings_file_name)) {
+        std::ifstream ifs(settings_file_name);
         settings = json::parse(ifs);
         return;
     }
     */
-    
-    settings[LOGS_PATH] = "logs/daily.txt";
 
-    std::ofstream ofs(SETTINGS_FILE_NAME);
+    settings[log_path] = "D:/puyo/movie/logs/log.txt";
+
+    std::ofstream ofs(settings_file_name);
     ofs << std::setw(4) << settings << std::endl;
 }
 
 int main()
 {
-    initSettings();
-    initLogger(settings[LOGS_PATH].get<std::string>());
+    init_settings();
+    init_logger(settings[log_path].get<std::string>());
 
-    auto logger = spdlog::get(LOGGER_MAIN);
+    const auto logger = spdlog::get(logger_main);
     logger->info("********** application start **********");
-
     logger->info(settings.dump(4));
+
+
 
     logger->info("********** application end **********");
     spdlog::drop_all();

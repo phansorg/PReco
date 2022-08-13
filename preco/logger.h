@@ -1,6 +1,6 @@
 #pragma once
 #include <spdlog/spdlog.h>
 
-constexpr auto LOGGER_MAIN = "main";
+constexpr auto logger_main = "main";
 
-void initLogger(std::string filePath);
+void init_logger(const std::string& file_path);
