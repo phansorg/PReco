@@ -5,19 +5,29 @@
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
+#include "logger.h"
+
+// ========================================================
+// settings
+// ========================================================
 nlohmann::json settings;
 const char* SETTINGS_FILE_NAME = "settings.json";
-const char* LOGS_DIRECTORY = "logs_directory";
+const char* LOGS_PATH = "LOGS_PATH";
 
+// ========================================================
+// functions
+// ========================================================
 void initSettings() {
 
+    /*
     if (std::filesystem::exists(SETTINGS_FILE_NAME)) {
         std::ifstream ifs(SETTINGS_FILE_NAME);
         settings = json::parse(ifs);
         return;
     }
+    */
     
-    settings[LOGS_DIRECTORY] = "./logs";
+    settings[LOGS_PATH] = "logs/daily.txt";
 
     std::ofstream ofs(SETTINGS_FILE_NAME);
     ofs << std::setw(4) << settings << std::endl;
@@ -26,9 +36,15 @@ void initSettings() {
 int main()
 {
     initSettings();
-    std::cout << settings[LOGS_DIRECTORY].dump(4) << std::endl;
+    initLogger(settings[LOGS_PATH].get<std::string>());
 
-    std::cout << "Hello World!" << std::endl;
+    auto logger = spdlog::get(LOGGER_MAIN);
+    logger->info("********** application start **********");
+
+    logger->info(settings.dump(4));
+
+    logger->info("********** application end **********");
+    spdlog::drop_all();
 }
 
 
