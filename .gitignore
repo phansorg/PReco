@@ -455,6 +455,6 @@ $RECYCLE.BIN/
 
 # 3rd-party
 preco/include/nlohmann
-preco/include/opencv
+preco/include/opencv2
 preco/include/spdlog
 preco/lib/opencv

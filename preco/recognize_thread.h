@@ -1,4 +1,5 @@
 #pragma once
+
 class recognize_thread
 {
 	bool thread_loop_;

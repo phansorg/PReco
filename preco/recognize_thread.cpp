@@ -1,4 +1,5 @@
 #include "recognize_thread.h"
+#include "base_thread.h"
 #include "logger.h"
 
 recognize_thread::recognize_thread()
@@ -13,7 +14,7 @@ void recognize_thread::run() const
 
 	while (thread_loop_)
 	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		std::this_thread::sleep_for(std::chrono::milliseconds(thread_sleep_ms));
 	}
 
 	SPDLOG_LOGGER_DEBUG(logger, "end");

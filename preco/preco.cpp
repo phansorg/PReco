@@ -40,7 +40,7 @@ void init_settings() {
     settings[capture_mode_key] = capture_mode::jpeg;
     settings[capture_path_key] = "D:/puyo/movie/image_target";
     settings[capture_start_no_key] = 4330;
-    settings[capture_last_no_key] = 4330;
+    settings[capture_last_no_key] = 4340;
     settings[history_dir_key] = "D:/puyo/movie/history";
 	settings[log_path_key] = "D:/puyo/movie/logs/log.txt";
 
