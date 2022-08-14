@@ -27,6 +27,7 @@ public:
 
 private:
 	void process();
+	cv::Mat pop();
 
 };
 

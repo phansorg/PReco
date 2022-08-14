@@ -48,14 +48,21 @@ void recognize_thread::process()
 {
 	while(!mat_queue_.empty())
 	{
-		cv::Mat mat = mat_queue_.front();
-		mat_queue_mutex_.lock();
-		mat_queue_.pop();
-		mat_queue_mutex_.unlock();
+		cv::Mat mat = pop();
+
+
 	}
 
 	if (capture_end_&& mat_queue_.empty())
 	{
 		request_end();
 	}
+}
+
+cv::Mat recognize_thread::pop()
+{
+	std::lock_guard lock(mat_queue_mutex_);
+	cv::Mat mat = mat_queue_.front();
+	mat_queue_.pop();
+	return mat;
 }
