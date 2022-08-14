@@ -31,12 +31,13 @@ void capture_thread::run()
 	while (thread_loop_)
     {
 		process();
-        std::this_thread::sleep_for(std::chrono::milliseconds(thread_sleep_ms));
+		SPDLOG_LOGGER_TRACE(logger, "sleep");
+		std::this_thread::sleep_for(std::chrono::milliseconds(thread_sleep_ms));
     }
 
 	// メインスレッドのキー押下ではなく、
-	// 自スレッドでループ終了条件を満たした場合の認識スレッド停止要求
-	recognize_thread_ptr_->request_end();
+	// 自スレッドでループ終了条件を満たした場合の通知
+	recognize_thread_ptr_->set_capture_end();
 
 	SPDLOG_LOGGER_DEBUG(logger, "end");
 }
@@ -62,6 +63,12 @@ void capture_thread::read_jpeg()
 
 	for (; cur_no_ <= last_no_; cur_no_++)
 	{
+		// 認識スレッドのキューが埋まっている場合、一旦抜ける
+		if (recognize_thread_ptr_->is_mat_queue_max())
+		{
+			return;
+		}
+
 		// jpegファイル名
 		std::ostringstream zero_padding;
 		zero_padding << std::setfill('0') << std::setw(jpeg_file_zero_count_) << cur_no_ << ".jpg";
@@ -75,8 +82,5 @@ void capture_thread::read_jpeg()
 	}
 
 	// 全ファイル処理した場合、スレッドループ終了
-	if (cur_no_ > last_no_)
-	{
-		request_end();
-	}
+	request_end();
 }

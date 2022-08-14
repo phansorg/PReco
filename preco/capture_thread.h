@@ -1,7 +1,6 @@
 #pragma once
 #include <memory>
 #include <string>
-
 #include <opencv2/opencv.hpp>
 
 #include "recognize_thread.h"
