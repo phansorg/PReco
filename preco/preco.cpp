@@ -8,6 +8,7 @@ using json = nlohmann::json;
 #include "logger.h"
 
 #include "capture_thread.h"
+#include "recognize_thread.h"
 
 // ========================================================
 // settings
@@ -47,39 +48,53 @@ void init_settings() {
     ofs << std::setw(json_indent) << settings << std::endl;
 }
 
-void start_thread()
+void run_threads()
 {
     const auto logger = spdlog::get(logger_main);
 
-	auto capture = capture_thread(
+    // スレッド開始
+    const auto recognize_thread_ptr = std::make_shared<recognize_thread>();
+    std::thread th_recognize{ [&] { recognize_thread_ptr->run(); } };
+
+	const auto capture_thread_ptr = std::make_shared<capture_thread>(
+        recognize_thread_ptr,
         static_cast<capture_mode>(settings[capture_mode_key].get<int>()),
         settings[capture_path_key].get<std::string>(),
         settings[capture_start_no_key].get<int>(),
         settings[capture_last_no_key].get<int>()
     );
+    std::thread th_capture{ [&] { capture_thread_ptr->run(); } };
 
-    std::thread th_capture{ [&] { capture.run(); } };
-
+    // キー押下待ち
     logger->info("Push any key to exit.");
     const auto c = getchar();
     logger->info(c);
 
-    capture.request_stop();
+    // スレッド終了要求
+    capture_thread_ptr->request_end();
+    recognize_thread_ptr->request_end();
 
+    // スレッド終了待ち
     th_capture.join();
+    th_recognize.join();
 }
 
 int main()
 {
+    // 設定とロガーの初期化
     init_settings();
     init_logger(settings[log_path_key].get<std::string>());
+
+	// 開始ログ
     const auto logger = spdlog::get(logger_main);
-    logger->debug("********** application start **********");
+    SPDLOG_LOGGER_DEBUG(logger, "********** application start **********");
     logger->info(settings.dump(json_indent));
 
-    start_thread();
+    // スレッド実行
+    run_threads();
 
-    logger->debug("********** application end **********");
+    // 終了ログ
+    SPDLOG_LOGGER_DEBUG(logger, "********** application end **********");
     spdlog::drop_all();
 }
 

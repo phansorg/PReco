@@ -16,11 +16,11 @@ constexpr auto max_files = 7;
 void init_logger(const std::string& file_path) {
     spdlog::init_thread_pool(q_size, thread_count);
 
-    // Init stdout log
+    // stdoutログの設定
     const auto stdout_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt >();
     stdout_sink->set_level(spdlog::level::trace);
 
-    // Init daily file log
+    // 日付ローテーションファイルログの設定
     const auto daily_sink = std::make_shared<spdlog::sinks::daily_file_sink_mt>(
         file_path,
         rotation_hour,
@@ -29,7 +29,7 @@ void init_logger(const std::string& file_path) {
         max_files);
     daily_sink->set_level(spdlog::level::trace);
 
-    // Register logger
+    // loggerに登録
     std::vector<spdlog::sink_ptr> sinks{
         stdout_sink,
         daily_sink

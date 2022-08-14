@@ -138,10 +138,12 @@
     <ClCompile Include="capture_thread.cpp" />
     <ClCompile Include="logger.cpp" />
     <ClCompile Include="preco.cpp" />
+    <ClCompile Include="recognize_thread.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="capture_thread.h" />
     <ClInclude Include="logger.h" />
+    <ClInclude Include="recognize_thread.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
