@@ -15,10 +15,12 @@ recognize_thread::recognize_thread()
 	mode_ = static_cast<recognize_mode>(json["recognize_start_mode"].get<int>());
 	field_width_ = json["recognize_field_width"].get<int>();
 	field_height_ = json["recognize_field_height"].get<int>();
-	field_x_ = json["recognize_field_x"].get<int>();
 	field_y_ = json["recognize_field_y"].get<int>();
 
 	capture_end_ = false;
+
+	players_.push_back(std::make_unique<player>(player::p1));
+	players_.push_back(std::make_unique<player>(player::p2));
 }
 
 void recognize_thread::run()
@@ -95,11 +97,14 @@ void recognize_thread::debug_init_game(const cv::Mat& org_mat)
 	auto debug_mat = org_mat.clone();
 
 	// field周囲の線を描画
-	const auto x1 = field_x_ - 1;
-	const auto y1 = field_y_ - 1;
-	const auto x2 = field_x_ + field_width_ + 1;
-	const auto y2 = field_y_ + field_height_ + 1;
-	rectangle(debug_mat, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(0, 0, 255), 1);
+	for (const auto& player : players_)
+	{
+		const auto x1 = player->field_x - 1;
+		const auto y1 = field_y_ - 1;
+		const auto x2 = player->field_x + field_width_ + 1;
+		const auto y2 = field_y_ + field_height_ + 1;
+		rectangle(debug_mat, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(0, 0, 255), 1);
+	}
 
 	// 出力ファイル名
 	std::ostringstream file_name;
