@@ -13,9 +13,6 @@ recognize_thread::recognize_thread()
 	debug_write_ = json["recognize_debug_write"].get<bool>();
 	debug_path_ = json["recognize_debug_path"].get<std::string>();
 	mode_ = static_cast<recognize_mode>(json["recognize_start_mode"].get<int>());
-	field_width_ = json["recognize_field_width"].get<int>();
-	field_height_ = json["recognize_field_height"].get<int>();
-	field_y_ = json["recognize_field_y"].get<int>();
 
 	capture_end_ = false;
 
@@ -67,8 +64,8 @@ void recognize_thread::process()
 
 		switch(mode_)
 		{
-		case recognize_mode::wait_character_select:
-			wait_character_select(org_mat);
+		case recognize_mode::wait_character:
+			wait_character(org_mat);
 			break;
 		case recognize_mode::wait_reset:
 			wait_reset(org_mat);
@@ -95,21 +92,16 @@ cv::Mat recognize_thread::pop()
 	return org_mat;
 }
 
-void recognize_thread::wait_character_select(const cv::Mat& org_mat)
+void recognize_thread::wait_character(const cv::Mat& org_mat)
 {
 	const auto logger = spdlog::get(logger_main);
 
 	std::vector<cv::Mat> channels;
 	cv::Point* pos = nullptr;
 
-	const auto width = field_width_;
-	const auto height = field_height_ / 2;
-
 	// 1P”Õ–Ê‚Ìã”¼•ª—Ìˆæ‚ª‘S‚ÄÔ‚Å‚ ‚ê‚ÎOK
 	const auto& p1 = players_[player::p1];
-	auto x = p1->field_x;
-	auto y = field_y_;
-	auto roi_mat = org_mat((cv::Rect(x, y, width, height)));
+	auto roi_mat = org_mat(p1->wait_character_rect);
 	split(roi_mat, channels);
 	if (!checkRange(channels[b], true, pos, 0, 100)) return;
 	if (!checkRange(channels[g], true, pos, 0, 100)) return;
@@ -117,9 +109,7 @@ void recognize_thread::wait_character_select(const cv::Mat& org_mat)
 
 	// 2P”Õ–Ê‚Ì‰º”¼•ª—Ìˆæ‚ª‘S‚Ä—Î‚Å‚ ‚ê‚ÎOK
 	const auto& p2 = players_[player::p2];
-	x = p2->field_x;
-	y = field_y_ + field_height_ / 2;
-	roi_mat = org_mat((cv::Rect(x, y, width, height)));
+	roi_mat = org_mat(p2->wait_character_rect);
 	split(roi_mat, channels);
 	if (!checkRange(channels[b], true, pos, 0, 100)) return;
 	if (!checkRange(channels[g], true, pos, 180, 255)) return;
@@ -134,16 +124,11 @@ void recognize_thread::wait_reset(const cv::Mat& org_mat)
 {
 	const auto logger = spdlog::get(logger_main);
 
-	const auto y = field_y_ + field_height_ / 2;
-	const auto width = field_width_ / 10;
-	const auto height = field_height_ / 10;
-
 	// ”Õ–Ê‚Ì’†‰›—Ìˆæ‚ª‘S‚Ä•‚Å‚ ‚ê‚ÎOK
 	for (const auto& player : players_)
 	{
 		cv::Point* pos = nullptr;
-		const auto x = player->field_x + field_width_ / 2;
-		if (const auto roi_mat = org_mat(cv::Rect(x, y, width, height)); 
+		if (const auto roi_mat = org_mat(player->wait_reset_rect);
 			!checkRange(roi_mat, true, pos, 0, 30)) return;
 	}
 
@@ -164,10 +149,11 @@ void recognize_thread::debug_init_game(const cv::Mat& org_mat) const
 	// field‚Ìü‚ð•`‰æ
 	for (const auto& player : players_)
 	{
-		const auto x1 = player->field_x;
-		const auto y1 = field_y_;
-		const auto x2 = player->field_x + field_width_;
-		const auto y2 = field_y_ + field_height_;
+		const auto rect = player->field_rect;
+		const auto x1 = rect.x;
+		const auto y1 = rect.y;
+		const auto x2 = rect.x + rect.width;
+		const auto y2 = rect.y + rect.height;
 		rectangle(debug_mat, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(0, 0, 255), 1);
 	}
 

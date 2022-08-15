@@ -37,13 +37,14 @@ void settings::init()
 
     json["log_path"] = "D:/puyo/movie/logs/log.txt";
 
+    json["player_field_x"] = 186;
+    json["player_field_y"] = 106;
+    json["player_field_width"] = 258;
+    json["player_field_height"] = 480;
+
     json["recognize_debug_write"] = true;
     json["recognize_debug_path"] = "D:/puyo/movie/image_debug";
-    json["recognize_start_mode"] = recognize_mode::wait_character_select;
-    json["recognize_field_width"] = 258;
-    json["recognize_field_height"] = 480;
-    json["recognize_field_x"] = 186;
-    json["recognize_field_y"] = 106;
+    json["recognize_start_mode"] = recognize_mode::wait_character;
 
     std::ofstream ofs(settings_file_name);
     ofs << std::setw(json_indent) << json << std::endl;
