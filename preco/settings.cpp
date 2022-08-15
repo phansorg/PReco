@@ -3,6 +3,7 @@
 #include <fstream>
 
 #include "capture_thread.h"
+#include "recognize_thread.h"
 
 constexpr auto settings_file_name = "settings.json";
 constexpr auto json_indent = 4;
@@ -29,8 +30,8 @@ void settings::init()
     // 設定ファイルが存在しない場合、デフォルト値で作成
     json["capture_mode"] = capture_mode::jpeg;
     json["capture_path"] = "D:/puyo/movie/image_target";
-    json["capture_start_no"] = 4330;
-    json["capture_last_no"] = 4340;
+    json["capture_start_no"] = 4210;
+    json["capture_last_no"] = 4230;
 
 	json["history_dir"] = "D:/puyo/movie/history";
 
@@ -38,6 +39,7 @@ void settings::init()
 
     json["recognize_debug_write"] = true;
     json["recognize_debug_path"] = "D:/puyo/movie/image_debug";
+    json["recognize_start_mode"] = recognize_mode::wait_character_select;
     json["recognize_field_width"] = 258;
     json["recognize_field_height"] = 480;
     json["recognize_field_x"] = 186;

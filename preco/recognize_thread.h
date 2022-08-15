@@ -4,6 +4,10 @@
 #include <queue>
 #include <mutex>
 
+enum class recognize_mode {
+	wait_character_select = 0,
+};
+
 class recognize_thread
 {
 	const unsigned long long mat_queue_max_size_ = 10;
@@ -13,6 +17,7 @@ class recognize_thread
 	int cur_no_;
 	bool debug_write_;
 	std::string debug_path_;
+	recognize_mode mode_;
 	int field_width_;
 	int field_height_;
 	int field_x_;

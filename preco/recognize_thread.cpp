@@ -12,6 +12,7 @@ recognize_thread::recognize_thread()
 	cur_no_ = json["capture_start_no"].get<int>();
 	debug_write_ = json["recognize_debug_write"].get<bool>();
 	debug_path_ = json["recognize_debug_path"].get<std::string>();
+	mode_ = static_cast<recognize_mode>(json["recognize_start_mode"].get<int>());
 	field_width_ = json["recognize_field_width"].get<int>();
 	field_height_ = json["recognize_field_height"].get<int>();
 	field_x_ = json["recognize_field_x"].get<int>();
@@ -61,7 +62,13 @@ void recognize_thread::process()
 	while(!mat_queue_.empty())
 	{
 		cv::Mat org_mat = pop();
-		debug_init_game(org_mat);
+		switch(mode_)
+		{
+		case recognize_mode::wait_character_select:
+			debug_init_game(org_mat);
+			break;
+		}
+
 	}
 
 	if (capture_end_&& mat_queue_.empty())
