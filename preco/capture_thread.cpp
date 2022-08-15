@@ -1,27 +1,25 @@
 #include "capture_thread.h"
 #include "base_thread.h"
+
+#include "settings.h"
 #include "logger.h"
 
 #include <filesystem>
 
-capture_thread::capture_thread(
-	const std::shared_ptr<recognize_thread>& recognize_thread_ptr,
-	const capture_mode mode,
-	const std::string& path,
-	const int start_no,
-	const int last_no) {
+capture_thread::capture_thread(const std::shared_ptr<recognize_thread>& recognize_thread_ptr) {
 
 	thread_loop_ = true;
 
 	recognize_thread_ptr_ = recognize_thread_ptr;
-	mode_ = mode;
-	path_ = path;
-	start_no_ = start_no;
-	last_no_ = last_no;
 
-	cur_no_ = start_no;
+	auto& json = settings::get_instance()->json;
+	mode_ = static_cast<capture_mode>(json["capture_mode"].get<int>());
+	path_ = json["capture_path"].get<std::string>();
+	start_no_ = json["capture_start_no"].get<int>();
+	last_no_ = json["capture_last_no"].get<int>();
+
+	cur_no_ = start_no_;
 }
-
 
 void capture_thread::run()
 {

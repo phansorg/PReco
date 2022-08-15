@@ -5,6 +5,8 @@
 #include "spdlog/sinks/daily_file_sink.h"
 #include <spdlog/async.h>
 
+#include "settings.h"
+
 constexpr auto q_size = 8192;
 constexpr auto thread_count = 1;
 
@@ -13,7 +15,10 @@ constexpr auto rotation_minute = 0;
 constexpr auto truncate = false;
 constexpr auto max_files = 7;
 
-void init_logger(const std::string& file_path) {
+void init_logger() {
+    auto& json = settings::get_instance()->json;
+    auto file_path = json["log_path"].get<std::string>();
+
     spdlog::init_thread_pool(q_size, thread_count);
 
     // stdoutƒƒO‚ÌÝ’è
@@ -41,5 +46,5 @@ void init_logger(const std::string& file_path) {
         spdlog::thread_pool(),
         spdlog::async_overflow_policy::block);
     logger->set_level(spdlog::level::trace);
-    spdlog::register_logger(logger);
+    register_logger(logger);
 }

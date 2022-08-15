@@ -23,12 +23,7 @@ class capture_thread
 	int cur_no_;
 
 public:
-	capture_thread(
-		const std::shared_ptr<recognize_thread>& recognize_thread_ptr,
-		const capture_mode mode,
-		const std::string& path,
-		const int start_no,
-		const int last_no);
+	capture_thread(const std::shared_ptr<recognize_thread>& recognize_thread_ptr);
 
 	void run();
 	void request_end();

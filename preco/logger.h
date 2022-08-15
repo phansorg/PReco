@@ -8,4 +8,4 @@
 
 constexpr auto logger_main = "main";
 
-void init_logger(const std::string& file_path);
+void init_logger();
