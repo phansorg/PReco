@@ -146,15 +146,26 @@ void recognize_thread::debug_init_game(const cv::Mat& org_mat) const
 
 	auto debug_mat = org_mat.clone();
 
-	// field‚Ìü‚ğ•`‰æ
 	for (const auto& player : players_)
 	{
-		const auto rect = player->field_rect;
-		const auto x1 = rect.x;
-		const auto y1 = rect.y;
-		const auto x2 = rect.x + rect.width;
-		const auto y2 = rect.y + rect.height;
+		// field‚Ìü‚ğ•`‰æ
+		auto rect = player->field_rect;
+		auto x1 = rect.x;
+		auto y1 = rect.y;
+		auto x2 = rect.x + rect.width;
+		auto y2 = rect.y + rect.height;
 		rectangle(debug_mat, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(0, 0, 255), 1);
+
+		// next‚Ìü‚ğ•`‰æ
+		for (const auto& next_rect : player->next_rect_vector)
+		{
+			rect = next_rect;
+			x1 = rect.x;
+			y1 = rect.y;
+			x2 = rect.x + rect.width;
+			y2 = rect.y + rect.height;
+			rectangle(debug_mat, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(0, 0, 255), 1);
+		}
 	}
 
 	// o—Íƒtƒ@ƒCƒ‹–¼
