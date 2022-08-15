@@ -5,7 +5,7 @@ class player
 	int player_idx_;
 
 public:
-	player(int player_idx);
+	explicit player(int player_idx);
 
 	static constexpr int p1 = 0;
 	static constexpr int p2 = 1;
