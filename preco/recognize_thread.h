@@ -6,7 +6,8 @@
 #include "player.h"
 
 enum class recognize_mode {
-	wait_character_select = 0,
+	wait_character_select,
+	wait_reset,
 };
 
 class recognize_thread
@@ -33,6 +34,10 @@ class recognize_thread
 public:
 	recognize_thread();
 
+	static constexpr int b = 0;
+	static constexpr int g = 1;
+	static constexpr int r = 2;
+
 	void run();
 	void request_end();
 	void set_capture_end();
@@ -44,6 +49,7 @@ private:
 	void process();
 	cv::Mat pop();
 
-	void debug_init_game(const cv::Mat& org_mat);
+	void wait_character_select(const cv::Mat& org_mat);
+	void debug_init_game(const cv::Mat& org_mat) const;
 };
 

@@ -64,13 +64,19 @@ void recognize_thread::process()
 	while(!mat_queue_.empty())
 	{
 		cv::Mat org_mat = pop();
+
 		switch(mode_)
 		{
 		case recognize_mode::wait_character_select:
 			debug_init_game(org_mat);
+			wait_character_select(org_mat);
+			break;
+		case recognize_mode::wait_reset:
+			debug_init_game(org_mat);
 			break;
 		}
 
+		cur_no_++;
 	}
 
 	if (capture_end_&& mat_queue_.empty())
@@ -87,7 +93,42 @@ cv::Mat recognize_thread::pop()
 	return org_mat;
 }
 
-void recognize_thread::debug_init_game(const cv::Mat& org_mat)
+void recognize_thread::wait_character_select(const cv::Mat& org_mat)
+{
+	const auto logger = spdlog::get(logger_main);
+
+	std::vector<cv::Mat> channels;
+	cv::Point* pos = nullptr;
+
+	const auto width = field_width_;
+	const auto height = field_height_ / 2;
+
+	// 1P盤面の上半分と同じ領域が全て赤
+	const auto& p1 = players_[player::p1];
+	auto x = p1->field_x;
+	auto y = field_y_;
+	auto roi_mat = org_mat((cv::Rect(x, y, width, height)));
+	split(roi_mat, channels);
+	if (!checkRange(channels[b], true, pos, 0, 100)) return;
+	if (!checkRange(channels[g], true, pos, 0, 100)) return;
+	if (!checkRange(channels[r], true, pos, 180, 255)) return;
+
+	// 2P盤面の下半分と同じ領域が全て緑
+	const auto& p2 = players_[player::p2];
+	x = p2->field_x;
+	y = field_y_ + field_height_ / 2;
+	roi_mat = org_mat((cv::Rect(x, y, width, height)));
+	split(roi_mat, channels);
+	if (!checkRange(channels[b], true, pos, 0, 100)) return;
+	if (!checkRange(channels[g], true, pos, 180, 255)) return;
+	if (!checkRange(channels[r], true, pos, 0, 100)) return;
+
+	// リセット待ちに遷移
+	mode_ = recognize_mode::wait_reset;
+	logger->info("No:{} wait_character_select -> wait_character_select", cur_no_);
+}
+
+void recognize_thread::debug_init_game(const cv::Mat& org_mat) const
 {
 	if (!settings::debug)
 	{
@@ -96,19 +137,19 @@ void recognize_thread::debug_init_game(const cv::Mat& org_mat)
 
 	auto debug_mat = org_mat.clone();
 
-	// field周囲の線を描画
+	// fieldの線を描画
 	for (const auto& player : players_)
 	{
-		const auto x1 = player->field_x - 1;
-		const auto y1 = field_y_ - 1;
-		const auto x2 = player->field_x + field_width_ + 1;
-		const auto y2 = field_y_ + field_height_ + 1;
+		const auto x1 = player->field_x;
+		const auto y1 = field_y_;
+		const auto x2 = player->field_x + field_width_;
+		const auto y2 = field_y_ + field_height_;
 		rectangle(debug_mat, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(0, 0, 255), 1);
 	}
 
 	// 出力ファイル名
 	std::ostringstream file_name;
-	file_name << cur_no_++ << ".png";
+	file_name << cur_no_ << ".png";
 
 	// ディレクトリパスと出力ファイル名を結合
 	std::filesystem::path file_path = debug_path_;
