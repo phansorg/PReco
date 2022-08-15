@@ -16,6 +16,7 @@ public:
 	}
 
 	nlohmann::json json;
+	static bool debug;
 
 	void init();
 	[[nodiscard]] std::string dump() const;

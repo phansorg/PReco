@@ -20,6 +20,7 @@ class capture_thread
 	std::string path_;
 	int start_no_;
 	int last_no_;
+
 	int cur_no_;
 
 public:

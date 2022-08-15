@@ -10,6 +10,14 @@ class recognize_thread
 
 	bool thread_loop_;
 
+	int cur_no_;
+	bool debug_mode_;
+	std::string debug_path_;
+	int field_width_;
+	int field_height_;
+	int field_x_;
+	int field_y_;
+
 	bool capture_end_;
 
 	std::mutex mat_queue_mutex_;
@@ -29,5 +37,6 @@ private:
 	void process();
 	cv::Mat pop();
 
+	void debug_init_game(const cv::Mat& org_mat);
 };
 

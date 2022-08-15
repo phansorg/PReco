@@ -77,6 +77,9 @@ void capture_thread::read_jpeg()
 
 		// jpegファイル読み込み
 		auto mat = cv::imread(file_path.string());
+
+		// 認識スレッドのキューに追加
+		recognize_thread_ptr_->add_mat_queue(mat);
 	}
 
 	// 全ファイル処理した場合、スレッドループ終了
