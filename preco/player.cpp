@@ -7,13 +7,16 @@ player::player(const int player_idx)
 	player_idx_ = player_idx;
 
 	auto& json = settings::get_instance()->json;
-	field_x_ = json["player_field_x"].get<int>();
 	field_y_ = json["player_field_y"].get<int>();
 	field_width_ = json["player_field_width"].get<int>();
 	field_height_ = json["player_field_height"].get<int>();
-	if (player_idx == p2)
+	if (player_idx == p1)
 	{
-		field_x_ += 651;
+		field_x_ = json["player_field_x1"].get<int>();
+	}
+	else
+	{
+		field_x_ = json["player_field_x2"].get<int>();
 	}
 
 	init_field_rect();

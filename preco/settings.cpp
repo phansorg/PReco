@@ -37,7 +37,8 @@ void settings::init()
 
     json["log_path"] = "D:/puyo/movie/logs/log.txt";
 
-    json["player_field_x"] = 186;
+    json["player_field_x1"] = 186;
+    json["player_field_x2"] = 837;
     json["player_field_y"] = 106;
     json["player_field_width"] = 258;
     json["player_field_height"] = 480;

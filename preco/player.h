@@ -22,6 +22,7 @@ public:
 	static constexpr int p2 = 1;
 
 	cv::Rect field_rect;
+	std::vector<cv::Rect> next_rect_vector;
 	cv::Rect wait_character_rect;
 	cv::Rect wait_reset_rect;
 };
