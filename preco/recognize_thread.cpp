@@ -134,8 +134,6 @@ void recognize_thread::wait_reset(const cv::Mat& org_mat)
 {
 	const auto logger = spdlog::get(logger_main);
 
-	cv::Point* pos = nullptr;
-
 	const auto y = field_y_ + field_height_ / 2;
 	const auto width = field_width_ / 10;
 	const auto height = field_height_ / 10;
@@ -143,8 +141,10 @@ void recognize_thread::wait_reset(const cv::Mat& org_mat)
 	// ”Õ–Ê‚Ì’†‰›—Ìˆæ‚ª‘S‚Ä•‚Å‚ ‚ê‚ÎOK
 	for (const auto& player : players_)
 	{
+		cv::Point* pos = nullptr;
 		const auto x = player->field_x + field_width_ / 2;
-		if (!checkRange(org_mat(cv::Rect(x, y, width, height)), true, pos, 0, 30)) return;
+		if (const auto roi_mat = org_mat(cv::Rect(x, y, width, height)); 
+			!checkRange(roi_mat, true, pos, 0, 30)) return;
 	}
 
 	// ‰Šú‰»‘Ò‚¿‚É‘JˆÚ
