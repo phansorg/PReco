@@ -36,7 +36,7 @@ void settings::init()
 
     json["log_path"] = "D:/puyo/movie/logs/log.txt";
 
-    json["recognize_debug_mode"] = true;
+    json["recognize_debug_write"] = true;
     json["recognize_debug_path"] = "D:/puyo/movie/image_debug";
     json["recognize_field_width"] = 258;
     json["recognize_field_height"] = 480;

@@ -11,7 +11,7 @@ class recognize_thread
 	bool thread_loop_;
 
 	int cur_no_;
-	bool debug_mode_;
+	bool debug_write_;
 	std::string debug_path_;
 	int field_width_;
 	int field_height_;

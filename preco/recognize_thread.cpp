@@ -10,7 +10,7 @@ recognize_thread::recognize_thread()
 
 	auto& json = settings::get_instance()->json;
 	cur_no_ = json["capture_start_no"].get<int>();
-	debug_mode_ = json["recognize_debug_mode"].get<bool>();
+	debug_write_ = json["recognize_debug_write"].get<bool>();
 	debug_path_ = json["recognize_debug_path"].get<std::string>();
 	field_width_ = json["recognize_field_width"].get<int>();
 	field_height_ = json["recognize_field_height"].get<int>();
