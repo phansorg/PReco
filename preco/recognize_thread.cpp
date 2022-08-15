@@ -68,10 +68,12 @@ void recognize_thread::process()
 		switch(mode_)
 		{
 		case recognize_mode::wait_character_select:
-			debug_init_game(org_mat);
 			wait_character_select(org_mat);
 			break;
 		case recognize_mode::wait_reset:
+			wait_reset(org_mat);
+			break;
+		case recognize_mode::wait_init:
 			debug_init_game(org_mat);
 			break;
 		}
@@ -103,7 +105,7 @@ void recognize_thread::wait_character_select(const cv::Mat& org_mat)
 	const auto width = field_width_;
 	const auto height = field_height_ / 2;
 
-	// 1P盤面の上半分と同じ領域が全て赤
+	// 1P盤面の上半分領域が全て赤であればOK
 	const auto& p1 = players_[player::p1];
 	auto x = p1->field_x;
 	auto y = field_y_;
@@ -113,7 +115,7 @@ void recognize_thread::wait_character_select(const cv::Mat& org_mat)
 	if (!checkRange(channels[g], true, pos, 0, 100)) return;
 	if (!checkRange(channels[r], true, pos, 180, 255)) return;
 
-	// 2P盤面の下半分と同じ領域が全て緑
+	// 2P盤面の下半分領域が全て緑であればOK
 	const auto& p2 = players_[player::p2];
 	x = p2->field_x;
 	y = field_y_ + field_height_ / 2;
@@ -125,7 +127,29 @@ void recognize_thread::wait_character_select(const cv::Mat& org_mat)
 
 	// リセット待ちに遷移
 	mode_ = recognize_mode::wait_reset;
-	logger->info("No:{} wait_character_select -> wait_character_select", cur_no_);
+	logger->info("No:{} recognize_mode:wait_reset", cur_no_);
+}
+
+void recognize_thread::wait_reset(const cv::Mat& org_mat)
+{
+	const auto logger = spdlog::get(logger_main);
+
+	cv::Point* pos = nullptr;
+
+	const auto y = field_y_ + field_height_ / 2;
+	const auto width = field_width_ / 10;
+	const auto height = field_height_ / 10;
+
+	// 盤面の中央領域が全て黒であればOK
+	for (const auto& player : players_)
+	{
+		const auto x = player->field_x + field_width_ / 2;
+		if (!checkRange(org_mat(cv::Rect(x, y, width, height)), true, pos, 0, 30)) return;
+	}
+
+	// 初期化待ちに遷移
+	mode_ = recognize_mode::wait_init;
+	logger->info("No:{} recognize_mode:wait_init", cur_no_);
 }
 
 void recognize_thread::debug_init_game(const cv::Mat& org_mat) const

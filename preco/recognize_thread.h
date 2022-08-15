@@ -8,6 +8,7 @@
 enum class recognize_mode {
 	wait_character_select,
 	wait_reset,
+	wait_init,
 };
 
 class recognize_thread
@@ -50,6 +51,7 @@ private:
 	cv::Mat pop();
 
 	void wait_character_select(const cv::Mat& org_mat);
+	void wait_reset(const cv::Mat& org_mat);
 	void debug_init_game(const cv::Mat& org_mat) const;
 };
 
