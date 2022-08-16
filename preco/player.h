@@ -6,26 +6,15 @@ class player
 {
 	int player_idx_;
 
-	int field_x_;
-	int field_y_;
-	int field_w_;
-	int field_h_;
-	int draw1_x_;
-	int draw1_y_;
-	int draw1_w_;
-	int draw1_h_;
-	int draw2_x_;
-	int draw2_y_;
-	int draw2_w_;
-	int draw2_h_;
+	cv::Rect field_frame_rect_;
+	cv::Rect draw1_frame_rect_;
+	cv::Rect draw2_frame_rect_;
 
-	cv::Rect field_rect_;
-	std::vector<cv::Rect> draw_rects_;
+	std::vector<cv::Rect> draw_cell_rects_;
 	cv::Rect wait_character_selection_rect_;
 	cv::Rect wait_reset_rect_;
 
-	void init_field_rect();
-	void init_draw_rects();
+	void init_draw_cell_rects();
 	void init_wait_character_selection_rect();
 	void init_wait_reset_rect();
 

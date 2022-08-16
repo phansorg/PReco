@@ -9,22 +9,26 @@ player::player(const int player_idx)
 	player_idx_ = player_idx;
 
 	auto& json = settings::get_instance()->json;
-	field_x_ = json["player_field_x"][player_idx_].get<int>();
-	field_y_ = json["player_field_y"].get<int>();
-	field_w_ = json["player_field_w"].get<int>();
-	field_h_ = json["player_field_h"].get<int>();
-	draw1_x_ = json["player_draw1_x"][player_idx_].get<int>();
-	draw1_y_ = json["player_draw1_y"].get<int>();
-	draw2_x_ = json["player_draw2_x"][player_idx_].get<int>();
-	draw2_y_ = json["player_draw2_y"].get<int>();
+	field_frame_rect_ = cv::Rect(
+		json["player_field_x"][player_idx_].get<int>(),
+		json["player_field_y"].get<int>(),
+		json["player_field_w"].get<int>(),
+		json["player_field_h"].get<int>()
+	);
+	draw1_frame_rect_ = cv::Rect(
+		json["player_draw1_x"][player_idx_].get<int>(),
+		json["player_draw1_y"].get<int>(),
+		field_frame_rect_.width / cols,
+		field_frame_rect_.height / rows
+	);
+	draw2_frame_rect_ = cv::Rect(
+		json["player_draw2_x"][player_idx_].get<int>(),
+		json["player_draw2_y"].get<int>(),
+		draw1_frame_rect_.width * 4 / 5,
+		draw1_frame_rect_.height * 4 / 5
+	);
 
-	draw1_w_ = field_w_ / cols;
-	draw1_h_ = field_h_ / rows;
-	draw2_w_ = draw1_w_ * 4 / 5;
-	draw2_h_ = draw1_h_ * 4 / 5;
-
-	init_field_rect();
-	init_draw_rects();
+	init_draw_cell_rects();
 	init_wait_character_selection_rect();
 	init_wait_reset_rect();
 }
@@ -32,48 +36,40 @@ player::player(const int player_idx)
 // ============================================================
 // rect
 // ============================================================
-
-void player::init_field_rect()
+void player::init_draw_cell_rects()
 {
-	field_rect_ = cv::Rect(
-		field_x_,
-		field_y_,
-		field_w_,
-		field_h_
-	);
-}
+	auto frame = draw1_frame_rect_;
+	auto x = frame.x + frame.width / 4;
+	auto y = frame.y + frame.height / 4;
+	auto w = frame.width / 2;
+	auto h = frame.height / 2;
+	draw_cell_rects_.emplace_back(x, y, w, h);
 
-void player::init_draw_rects()
-{
-	auto x = draw1_x_ + draw1_w_ / 4;
-	auto y = draw1_y_ + draw1_h_ / 4;
-	auto w = draw1_w_ / 2;
-	auto h = draw1_h_ / 2;
-	draw_rects_.emplace_back(x, y, w, h);
+	y += frame.height;
+	draw_cell_rects_.emplace_back(x, y, w, h);
 
-	y += draw1_h_;
-	draw_rects_.emplace_back(x, y, w, h);
+	frame = draw2_frame_rect_;
+	x = frame.x + frame.width / 4;
+	y = frame.y + frame.height / 4;
+	w = frame.width / 2;
+	h = frame.height / 2;
+	draw_cell_rects_.emplace_back(x, y, w, h);
 
-	x = draw2_x_ + draw2_w_ / 4;
-	y = draw2_y_ + draw2_h_ / 4;
-	w = draw2_w_ / 2;
-	h = draw2_h_ / 2;
-	draw_rects_.emplace_back(x, y, w, h);
-
-	y += draw2_h_;
-	draw_rects_.emplace_back(x, y, w, h);
+	y += frame.height;
+	draw_cell_rects_.emplace_back(x, y, w, h);
 }
 
 void player::init_wait_character_selection_rect()
 {
 	// 1P”Õ–Ê‚Ìã”¼•ª—Ìˆæ‚ª‘S‚ÄÔ‚Å‚ ‚ê‚ÎOK
 	// 2P”Õ–Ê‚Ì‰º”¼•ª—Ìˆæ‚ª‘S‚Ä—Î‚Å‚ ‚ê‚ÎOK
-	const auto y = player_idx_ == p1 ? field_y_ : field_y_ + field_h_ / 2;
+	const auto y = player_idx_ == p1 ? 
+		field_frame_rect_.y : field_frame_rect_.y + field_frame_rect_.height / 2;
 	wait_character_selection_rect_ = cv::Rect(
-		field_x_,
+		field_frame_rect_.x,
 		y,
-		field_w_,
-		field_h_ / 2
+		field_frame_rect_.width,
+		field_frame_rect_.height / 2
 	);
 }
 
@@ -81,10 +77,10 @@ void player::init_wait_reset_rect()
 {
 	// ”Õ–Ê‚Ì’†‰›—Ìˆæ‚ª‘S‚Ä•‚Å‚ ‚ê‚ÎOK
 	wait_reset_rect_ = cv::Rect(
-		field_x_ + field_w_ / 2,
-		field_y_ + field_h_ / 2,
-		field_w_ / 10,
-		field_h_ / 10
+		field_frame_rect_.x + field_frame_rect_.width / 2,
+		field_frame_rect_.y + field_frame_rect_.height / 2,
+		field_frame_rect_.width / 10,
+		field_frame_rect_.height / 10
 	);
 }
 
@@ -134,7 +130,7 @@ bool player::wait_game_start(const cv::Mat& org_mat) const
 void player::debug_wait_init(const cv::Mat& debug_mat) const
 {
 	// field‚Ìü‚ğ•`‰æ
-	auto rect = field_rect_;
+	auto rect = field_frame_rect_;
 	auto x1 = rect.x;
 	auto y1 = rect.y;
 	auto x2 = rect.x + rect.width;
@@ -142,7 +138,7 @@ void player::debug_wait_init(const cv::Mat& debug_mat) const
 	rectangle(debug_mat, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(0, 0, 255), 1);
 
 	// draw‚Ìü‚ğ•`‰æ
-	for (const auto& draw_rect : draw_rects_)
+	for (const auto& draw_rect : draw_cell_rects_)
 	{
 		rect = draw_rect;
 		x1 = rect.x;
