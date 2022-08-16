@@ -3,7 +3,7 @@
 #include <string>
 #include <opencv2/opencv.hpp>
 
-#include "recognize_thread.h"
+#include "game_thread.h"
 
 enum class capture_mode { 
 	jpeg = 0,
@@ -15,7 +15,7 @@ class capture_thread
 
 	bool thread_loop_;
 
-	std::shared_ptr<recognize_thread> recognize_thread_ptr_;
+	std::shared_ptr<game_thread> game_thread_ptr_;
 	capture_mode mode_;
 	std::string path_;
 	int start_no_;
@@ -24,7 +24,7 @@ class capture_thread
 	int cur_no_;
 
 public:
-	capture_thread(const std::shared_ptr<recognize_thread>& recognize_thread_ptr);
+	capture_thread(const std::shared_ptr<game_thread>& game_thread_ptr);
 
 	void run();
 	void request_end();

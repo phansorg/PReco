@@ -11,7 +11,7 @@ enum class game_mode {
 	wait_init,
 };
 
-class recognize_thread
+class game_thread
 {
 	const unsigned long long mat_queue_max_size_ = 10;
 
@@ -30,7 +30,7 @@ class recognize_thread
 	std::vector<std::unique_ptr<player>> players_;
 
 public:
-	recognize_thread();
+	game_thread();
 
 	static constexpr int b = 0;
 	static constexpr int g = 1;

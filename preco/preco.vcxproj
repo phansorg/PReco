@@ -143,7 +143,7 @@
     <ClCompile Include="logger.cpp" />
     <ClCompile Include="player.cpp" />
     <ClCompile Include="preco.cpp" />
-    <ClCompile Include="recognize_thread.cpp" />
+    <ClCompile Include="game_thread.cpp" />
     <ClCompile Include="settings.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -151,7 +151,7 @@
     <ClInclude Include="capture_thread.h" />
     <ClInclude Include="logger.h" />
     <ClInclude Include="player.h" />
-    <ClInclude Include="recognize_thread.h" />
+    <ClInclude Include="game_thread.h" />
     <ClInclude Include="settings.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

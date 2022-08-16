@@ -1,18 +1,18 @@
-#include "recognize_thread.h"
+#include "game_thread.h"
 #include "base_thread.h"
 
 #include "settings.h"
 #include "logger.h"
 
-recognize_thread::recognize_thread()
+game_thread::game_thread()
 {
 	thread_loop_ = true;
 
 	auto& json = settings::get_instance()->json;
 	cur_no_ = json["capture_start_no"].get<int>();
-	debug_write_ = json["recognize_debug_write"].get<bool>();
-	debug_path_ = json["recognize_debug_path"].get<std::string>();
-	mode_ = static_cast<game_mode>(json["recognize_start_mode"].get<int>());
+	debug_write_ = json["game_debug_write"].get<bool>();
+	debug_path_ = json["game_debug_path"].get<std::string>();
+	mode_ = static_cast<game_mode>(json["game_start_mode"].get<int>());
 
 	capture_end_ = false;
 
@@ -20,7 +20,7 @@ recognize_thread::recognize_thread()
 	players_.push_back(std::make_unique<player>(player::p2));
 }
 
-void recognize_thread::run()
+void game_thread::run()
 {
 	const auto logger = spdlog::get(logger_main);
 	SPDLOG_LOGGER_DEBUG(logger, "start");
@@ -35,28 +35,28 @@ void recognize_thread::run()
 	SPDLOG_LOGGER_DEBUG(logger, "end");
 }
 
-void recognize_thread::request_end()
+void game_thread::request_end()
 {
 	thread_loop_ = false;
 }
 
-void recognize_thread::set_capture_end()
+void game_thread::set_capture_end()
 {
 	capture_end_ = true;
 }
 
-bool recognize_thread::is_mat_queue_max() const
+bool game_thread::is_mat_queue_max() const
 {
 	return mat_queue_.size() >= mat_queue_max_size_;
 }
 
-void recognize_thread::add_mat_queue(const cv::Mat& mat)
+void game_thread::add_mat_queue(const cv::Mat& mat)
 {
 	std::lock_guard lock(mat_queue_mutex_);
 	mat_queue_.push(mat);
 }
 
-void recognize_thread::process()
+void game_thread::process()
 {
 	while(!mat_queue_.empty())
 	{
@@ -84,7 +84,7 @@ void recognize_thread::process()
 	}
 }
 
-cv::Mat recognize_thread::pop()
+cv::Mat game_thread::pop()
 {
 	std::lock_guard lock(mat_queue_mutex_);
 	cv::Mat org_mat = mat_queue_.front();
@@ -92,7 +92,7 @@ cv::Mat recognize_thread::pop()
 	return org_mat;
 }
 
-void recognize_thread::wait_character_selection(const cv::Mat& org_mat)
+void game_thread::wait_character_selection(const cv::Mat& org_mat)
 {
 	const auto logger = spdlog::get(logger_main);
 
@@ -120,7 +120,7 @@ void recognize_thread::wait_character_selection(const cv::Mat& org_mat)
 	logger->info("No:{} game_mode:wait_start", cur_no_);
 }
 
-void recognize_thread::wait_start(const cv::Mat& org_mat)
+void game_thread::wait_start(const cv::Mat& org_mat)
 {
 	const auto logger = spdlog::get(logger_main);
 
@@ -137,7 +137,7 @@ void recognize_thread::wait_start(const cv::Mat& org_mat)
 	logger->info("No:{} game_mode:wait_init", cur_no_);
 }
 
-void recognize_thread::debug_wait_init(const cv::Mat& org_mat) const
+void game_thread::debug_wait_init(const cv::Mat& org_mat) const
 {
 	if (!settings::debug)
 	{

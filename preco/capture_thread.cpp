@@ -6,11 +6,11 @@
 
 #include <filesystem>
 
-capture_thread::capture_thread(const std::shared_ptr<recognize_thread>& recognize_thread_ptr) {
+capture_thread::capture_thread(const std::shared_ptr<game_thread>& game_thread_ptr) {
 
 	thread_loop_ = true;
 
-	recognize_thread_ptr_ = recognize_thread_ptr;
+	game_thread_ptr_ = game_thread_ptr;
 
 	auto& json = settings::get_instance()->json;
 	mode_ = static_cast<capture_mode>(json["capture_mode"].get<int>());
@@ -35,7 +35,7 @@ void capture_thread::run()
 
 	// メインスレッドのキー押下ではなく、
 	// 自スレッドでループ終了条件を満たした場合の通知
-	recognize_thread_ptr_->set_capture_end();
+	game_thread_ptr_->set_capture_end();
 
 	SPDLOG_LOGGER_DEBUG(logger, "end");
 }
@@ -61,8 +61,8 @@ void capture_thread::read_jpeg()
 
 	for (; cur_no_ <= last_no_; cur_no_++)
 	{
-		// 認識スレッドのキューが埋まっている場合、一旦抜ける
-		if (recognize_thread_ptr_->is_mat_queue_max())
+		// 後続スレッドのキューが埋まっている場合、一旦抜ける
+		if (game_thread_ptr_->is_mat_queue_max())
 		{
 			return;
 		}
@@ -78,8 +78,8 @@ void capture_thread::read_jpeg()
 		// jpegファイル読み込み
 		auto mat = cv::imread(file_path.string());
 
-		// 認識スレッドのキューに追加
-		recognize_thread_ptr_->add_mat_queue(mat);
+		// 後続スレッドのキューに追加
+		game_thread_ptr_->add_mat_queue(mat);
 	}
 
 	// 全ファイル処理した場合、スレッドループ終了

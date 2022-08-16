@@ -6,17 +6,17 @@
 #include "logger.h"
 
 #include "capture_thread.h"
-#include "recognize_thread.h"
+#include "game_thread.h"
 
 void run_threads()
 {
     const auto logger = spdlog::get(logger_main);
 
     // スレッド開始
-    const auto recognize_thread_ptr = std::make_shared<recognize_thread>();
-    std::thread th_recognize{ [&] { recognize_thread_ptr->run(); } };
+    const auto game_thread_ptr = std::make_shared<game_thread>();
+    std::thread th_game{ [&] { game_thread_ptr->run(); } };
 
-	const auto capture_thread_ptr = std::make_shared<capture_thread>(recognize_thread_ptr);
+	const auto capture_thread_ptr = std::make_shared<capture_thread>(game_thread_ptr);
     std::thread th_capture{ [&] { capture_thread_ptr->run(); } };
 
     // キー押下待ち
@@ -26,11 +26,11 @@ void run_threads()
 
     // スレッド終了要求
     capture_thread_ptr->request_end();
-    recognize_thread_ptr->request_end();
+    game_thread_ptr->request_end();
 
     // スレッド終了待ち
     th_capture.join();
-    th_recognize.join();
+    th_game.join();
 }
 
 int main()

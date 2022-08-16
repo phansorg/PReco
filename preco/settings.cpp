@@ -3,7 +3,7 @@
 #include <fstream>
 
 #include "capture_thread.h"
-#include "recognize_thread.h"
+#include "game_thread.h"
 
 constexpr auto settings_file_name = "settings.json";
 constexpr auto json_indent = 4;
@@ -46,9 +46,9 @@ void settings::init()
     json["player_next2_x"] = { 514, 732 };
     json["player_next2_y"] = 196;
 
-    json["recognize_debug_write"] = true;
-    json["recognize_debug_path"] = "D:/puyo/movie/image_debug";
-    json["recognize_start_mode"] = game_mode::wait_character_selection;
+    json["game_debug_write"] = true;
+    json["game_debug_path"] = "D:/puyo/movie/image_debug";
+    json["game_start_mode"] = game_mode::wait_character_selection;
 
     std::ofstream ofs(settings_file_name);
     ofs << std::setw(json_indent) << json << std::endl;
