@@ -8,7 +8,7 @@
 enum class game_mode {
 	wait_character_selection,
 	wait_game_start,
-	wait_game_init,
+	wait_game_end,
 };
 
 class game_thread
@@ -21,6 +21,7 @@ class game_thread
 	bool debug_write_;
 	std::string debug_path_;
 	game_mode mode_;
+	unsigned long long histories_size_;
 
 	bool capture_end_;
 
@@ -29,6 +30,7 @@ class game_thread
 
 	std::vector<std::unique_ptr<player>> players_;
 
+	std::list<cv::Mat> mat_histories_;
 public:
 	game_thread();
 
@@ -42,9 +44,12 @@ public:
 private:
 	void process();
 	cv::Mat pop();
+	void add_history(const cv::Mat& org_mat);
 
 	void wait_character_selection(const cv::Mat& org_mat);
 	void wait_game_start(const cv::Mat& org_mat);
+	void wait_game_end(const cv::Mat& org_mat);
+
 	void debug_wait_game_init(const cv::Mat& org_mat) const;
 	void write_debug_image_file(const cv::Mat& debug_mat) const;
 };

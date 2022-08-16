@@ -144,6 +144,7 @@
     <ClCompile Include="player.cpp" />
     <ClCompile Include="preco.cpp" />
     <ClCompile Include="game_thread.cpp" />
+    <ClCompile Include="ring_buffer.cpp" />
     <ClCompile Include="settings.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -152,6 +153,7 @@
     <ClInclude Include="logger.h" />
     <ClInclude Include="player.h" />
     <ClInclude Include="game_thread.h" />
+    <ClInclude Include="ring_buffer.h" />
     <ClInclude Include="settings.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

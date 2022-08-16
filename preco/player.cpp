@@ -3,11 +3,13 @@
 #include <opencv2/imgproc.hpp>
 
 #include "settings.h"
+#include "logger.h"
 
 player::player(const int player_idx)
 {
 	player_idx_ = player_idx;
 
+	// Rect‚ÌÝ’è“Ç‚Ýž‚Ý
 	auto& json = settings::get_instance()->json;
 	field_frame_rect_ = cv::Rect(
 		json["player_field_x"][player_idx_].get<int>(),
@@ -34,14 +36,17 @@ player::player(const int player_idx)
 	draw_frame_rects_[3] = cv::Rect(draw_frame_rects_[2]);
 	draw_frame_rects_[3].y += draw_frame_rects_[3].height;
 
+	// ‚»‚Ì‘¼Rect‚ÌŒvŽZ
 	for(int idx = 0; idx < draw_cells; idx++)
 	{
 		draw_cell_rects_[idx] = to_recognize_rect(draw_frame_rects_[idx]);
 
 	}
-
 	init_wait_character_selection_rect();
 	init_wait_reset_rect();
+
+	histories_size_ = json["game_histories_size"].get<int>();
+	draw_mse_ring_buffer_ = ring_buffer(mse_init, histories_size_, draw_cells);
 }
 
 // ============================================================
@@ -119,6 +124,42 @@ bool player::wait_game_start(const cv::Mat& org_mat) const
 		!checkRange(roi_mat, true, pos, 0, 30)) return false;
 
 	return true;
+}
+
+bool player::game(int cur_no, const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)
+{
+	const auto logger = spdlog::get(logger_main);
+	SPDLOG_LOGGER_TRACE(logger, "game No:{}", cur_no);
+
+	return wait_draw_stable(org_mat, mat_histories);
+}
+
+bool player::wait_draw_stable(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)
+{
+	const auto logger = spdlog::get(logger_main);
+
+	draw_mse_ring_buffer_.next_record();
+	for (int idx = 0; idx < draw_cells; idx++)
+	{
+		const auto& org_roi = org_mat(draw_cell_rects_[idx]);
+		const auto history_roi = mat_histories.front()(draw_cell_rects_[idx]);
+
+		cv::Mat diff_mat;
+		subtract(org_roi, history_roi, diff_mat);
+		cv::Mat pow_mat;
+		pow(diff_mat, 2, pow_mat);
+		auto mean = cv::mean(pow_mat);
+
+		draw_mse_ring_buffer_.set(static_cast<int>(mean[r] + mean[b] + mean[b]), idx);
+	}
+
+	SPDLOG_LOGGER_TRACE(logger, "game mse1:{} mse2:{} mse3:{} mse4:{}",
+		draw_mse_ring_buffer_.get(0),
+		draw_mse_ring_buffer_.get(1),
+		draw_mse_ring_buffer_.get(2),
+		draw_mse_ring_buffer_.get(3)
+	);
+	return false;
 }
 
 // ============================================================
