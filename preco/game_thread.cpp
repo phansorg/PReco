@@ -67,11 +67,11 @@ void game_thread::process()
 		case game_mode::wait_character_selection:
 			wait_character_selection(org_mat);
 			break;
-		case game_mode::wait_start:
-			wait_start(org_mat);
+		case game_mode::wait_game_start:
+			wait_game_start(org_mat);
 			break;
-		case game_mode::wait_init:
-			debug_wait_init(org_mat);
+		case game_mode::wait_game_init:
+			debug_wait_game_init(org_mat);
 			break;
 		}
 
@@ -96,76 +96,40 @@ void game_thread::wait_character_selection(const cv::Mat& org_mat)
 {
 	const auto logger = spdlog::get(logger_main);
 
-	std::vector<cv::Mat> channels;
-	cv::Point* pos = nullptr;
+	for (const auto & player : players_)
+	{
+		if (!player->wait_character_selection(org_mat)) return;
+	}
 
-	// 1P盤面の上半分領域が全て赤であればOK
-	const auto& p1 = players_[player::p1];
-	auto roi_mat = org_mat(p1->wait_character_rect);
-	split(roi_mat, channels);
-	if (!checkRange(channels[b], true, pos, 0, 100)) return;
-	if (!checkRange(channels[g], true, pos, 0, 100)) return;
-	if (!checkRange(channels[r], true, pos, 180, 255)) return;
-
-	// 2P盤面の下半分領域が全て緑であればOK
-	const auto& p2 = players_[player::p2];
-	roi_mat = org_mat(p2->wait_character_rect);
-	split(roi_mat, channels);
-	if (!checkRange(channels[b], true, pos, 0, 100)) return;
-	if (!checkRange(channels[g], true, pos, 180, 255)) return;
-	if (!checkRange(channels[r], true, pos, 0, 100)) return;
-
-	// リセット待ちに遷移
-	mode_ = game_mode::wait_start;
-	logger->info("No:{} game_mode:wait_start", cur_no_);
+	mode_ = game_mode::wait_game_start;
+	logger->info("No:{} game_mode:wait_game_start", cur_no_);
 }
 
-void game_thread::wait_start(const cv::Mat& org_mat)
+void game_thread::wait_game_start(const cv::Mat& org_mat)
 {
 	const auto logger = spdlog::get(logger_main);
 
-	// 盤面の中央領域が全て黒であればOK
 	for (const auto& player : players_)
 	{
-		cv::Point* pos = nullptr;
-		if (const auto roi_mat = org_mat(player->wait_reset_rect);
-			!checkRange(roi_mat, true, pos, 0, 30)) return;
+		if (!player->wait_game_start(org_mat)) return;
 	}
 
-	// 初期化待ちに遷移
-	mode_ = game_mode::wait_init;
-	logger->info("No:{} game_mode:wait_init", cur_no_);
+	mode_ = game_mode::wait_game_init;
+	logger->info("No:{} game_mode:wait_game_init", cur_no_);
 }
 
-void game_thread::debug_wait_init(const cv::Mat& org_mat) const
+void game_thread::debug_wait_game_init(const cv::Mat& org_mat) const
 {
 	if (!settings::debug)
 	{
 		return;
 	}
 
-	auto debug_mat = org_mat.clone();
+	const auto debug_mat = org_mat.clone();
 
 	for (const auto& player : players_)
 	{
-		// fieldの線を描画
-		auto rect = player->field_rect;
-		auto x1 = rect.x;
-		auto y1 = rect.y;
-		auto x2 = rect.x + rect.width;
-		auto y2 = rect.y + rect.height;
-		rectangle(debug_mat, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(0, 0, 255), 1);
-
-		// nextの線を描画
-		for (const auto& next_rect : player->next_rect_vector)
-		{
-			rect = next_rect;
-			x1 = rect.x;
-			y1 = rect.y;
-			x2 = rect.x + rect.width;
-			y2 = rect.y + rect.height;
-			rectangle(debug_mat, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(0, 0, 255), 1);
-		}
+		player->debug_wait_init(debug_mat);
 	}
 
 	// 出力ファイル名

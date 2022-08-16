@@ -7,8 +7,8 @@
 
 enum class game_mode {
 	wait_character_selection,
-	wait_start,
-	wait_init,
+	wait_game_start,
+	wait_game_init,
 };
 
 class game_thread
@@ -32,10 +32,6 @@ class game_thread
 public:
 	game_thread();
 
-	static constexpr int b = 0;
-	static constexpr int g = 1;
-	static constexpr int r = 2;
-
 	void run();
 	void request_end();
 	void set_capture_end();
@@ -48,7 +44,7 @@ private:
 	cv::Mat pop();
 
 	void wait_character_selection(const cv::Mat& org_mat);
-	void wait_start(const cv::Mat& org_mat);
-	void debug_wait_init(const cv::Mat& org_mat) const;
+	void wait_game_start(const cv::Mat& org_mat);
+	void debug_wait_game_init(const cv::Mat& org_mat) const;
 };
 
