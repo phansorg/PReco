@@ -41,7 +41,7 @@ public:
 	static constexpr int g = 1;
 	static constexpr int r = 2;
 
-	bool wait_character_selection(const cv::Mat& org_mat) const;
-	bool wait_game_start(const cv::Mat& org_mat) const;
+	[[nodiscard]] bool wait_character_selection(const cv::Mat& org_mat) const;
+	[[nodiscard]] bool wait_game_start(const cv::Mat& org_mat) const;
 	void debug_wait_init(const cv::Mat& debug_mat) const;
 };

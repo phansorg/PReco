@@ -29,6 +29,10 @@ player::player(const int player_idx)
 	init_wait_reset_rect();
 }
 
+// ============================================================
+// rect
+// ============================================================
+
 void player::init_field_rect()
 {
 	field_rect_ = cv::Rect(
@@ -84,6 +88,10 @@ void player::init_wait_reset_rect()
 	);
 }
 
+// ============================================================
+// game
+// ============================================================
+
 bool player::wait_character_selection(const cv::Mat& org_mat) const
 {
 	std::vector<cv::Mat> channels;
@@ -118,6 +126,10 @@ bool player::wait_game_start(const cv::Mat& org_mat) const
 
 	return true;
 }
+
+// ============================================================
+// debug
+// ============================================================
 
 void player::debug_wait_init(const cv::Mat& debug_mat) const
 {

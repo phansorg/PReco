@@ -58,11 +58,11 @@ void game_thread::add_mat_queue(const cv::Mat& mat)
 
 void game_thread::process()
 {
-	while(!mat_queue_.empty())
+	while (!mat_queue_.empty())
 	{
 		cv::Mat org_mat = pop();
 
-		switch(mode_)
+		switch (mode_)
 		{
 		case game_mode::wait_character_selection:
 			wait_character_selection(org_mat);
@@ -78,7 +78,7 @@ void game_thread::process()
 		cur_no_++;
 	}
 
-	if (capture_end_&& mat_queue_.empty())
+	if (capture_end_ && mat_queue_.empty())
 	{
 		request_end();
 	}
@@ -92,6 +92,10 @@ cv::Mat game_thread::pop()
 	return org_mat;
 }
 
+// ============================================================
+// game
+// ============================================================
+
 void game_thread::wait_character_selection(const cv::Mat& org_mat)
 {
 	const auto logger = spdlog::get(logger_main);
@@ -102,7 +106,7 @@ void game_thread::wait_character_selection(const cv::Mat& org_mat)
 	}
 
 	mode_ = game_mode::wait_game_start;
-	logger->info("No:{} game_mode:wait_game_start", cur_no_);
+	logger->info("No:{} game_mode:{}", cur_no_, static_cast<int>(mode_));
 }
 
 void game_thread::wait_game_start(const cv::Mat& org_mat)
@@ -115,23 +119,27 @@ void game_thread::wait_game_start(const cv::Mat& org_mat)
 	}
 
 	mode_ = game_mode::wait_game_init;
-	logger->info("No:{} game_mode:wait_game_init", cur_no_);
+	logger->info("No:{} game_mode:{}", cur_no_, static_cast<int>(mode_));
 }
+
+// ============================================================
+// debug
+// ============================================================
 
 void game_thread::debug_wait_game_init(const cv::Mat& org_mat) const
 {
-	if (!settings::debug)
-	{
-		return;
-	}
+	if (!settings::debug) return;
 
 	const auto debug_mat = org_mat.clone();
-
 	for (const auto& player : players_)
 	{
 		player->debug_wait_init(debug_mat);
 	}
+	write_debug_image_file(debug_mat);
+}
 
+void game_thread::write_debug_image_file(const cv::Mat& debug_mat) const
+{
 	// 出力ファイル名
 	std::ostringstream file_name;
 	file_name << cur_no_ << ".png";
