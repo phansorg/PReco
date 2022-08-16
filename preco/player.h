@@ -18,19 +18,16 @@ class player
 	int draw2_y_;
 	int draw2_w_;
 	int draw2_h_;
-	int draw_histories_size_;
 
 	cv::Rect field_rect_;
-	std::vector<cv::Rect> draw_rect_vector_;
+	std::vector<cv::Rect> draw_rects_;
 	cv::Rect wait_character_selection_rect_;
 	cv::Rect wait_reset_rect_;
 
 	void init_field_rect();
-	void init_draw_rect_vector();
+	void init_draw_rects();
 	void init_wait_character_selection_rect();
 	void init_wait_reset_rect();
-
-	std::vector<cv::Mat> prev_draw_vector_;
 
 public:
 	explicit player(int player_idx);

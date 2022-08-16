@@ -24,7 +24,7 @@ player::player(const int player_idx)
 	draw2_h_ = draw1_h_ * 4 / 5;
 
 	init_field_rect();
-	init_draw_rect_vector();
+	init_draw_rects();
 	init_wait_character_selection_rect();
 	init_wait_reset_rect();
 }
@@ -43,25 +43,25 @@ void player::init_field_rect()
 	);
 }
 
-void player::init_draw_rect_vector()
+void player::init_draw_rects()
 {
 	auto x = draw1_x_ + draw1_w_ / 4;
 	auto y = draw1_y_ + draw1_h_ / 4;
 	auto w = draw1_w_ / 2;
 	auto h = draw1_h_ / 2;
-	draw_rect_vector_.emplace_back(x, y, w, h);
+	draw_rects_.emplace_back(x, y, w, h);
 
 	y += draw1_h_;
-	draw_rect_vector_.emplace_back(x, y, w, h);
+	draw_rects_.emplace_back(x, y, w, h);
 
 	x = draw2_x_ + draw2_w_ / 4;
 	y = draw2_y_ + draw2_h_ / 4;
 	w = draw2_w_ / 2;
 	h = draw2_h_ / 2;
-	draw_rect_vector_.emplace_back(x, y, w, h);
+	draw_rects_.emplace_back(x, y, w, h);
 
 	y += draw2_h_;
-	draw_rect_vector_.emplace_back(x, y, w, h);
+	draw_rects_.emplace_back(x, y, w, h);
 }
 
 void player::init_wait_character_selection_rect()
@@ -142,7 +142,7 @@ void player::debug_wait_init(const cv::Mat& debug_mat) const
 	rectangle(debug_mat, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(0, 0, 255), 1);
 
 	// drawÇÃê¸Çï`âÊ
-	for (const auto& draw_rect : draw_rect_vector_)
+	for (const auto& draw_rect : draw_rects_)
 	{
 		rect = draw_rect;
 		x1 = rect.x;
