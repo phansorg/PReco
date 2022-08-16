@@ -48,7 +48,7 @@ void settings::init()
 
     json["recognize_debug_write"] = true;
     json["recognize_debug_path"] = "D:/puyo/movie/image_debug";
-    json["recognize_start_mode"] = recognize_mode::wait_character;
+    json["recognize_start_mode"] = game_mode::wait_character_selection;
 
     std::ofstream ofs(settings_file_name);
     ofs << std::setw(json_indent) << json << std::endl;

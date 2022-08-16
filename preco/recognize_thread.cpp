@@ -12,7 +12,7 @@ recognize_thread::recognize_thread()
 	cur_no_ = json["capture_start_no"].get<int>();
 	debug_write_ = json["recognize_debug_write"].get<bool>();
 	debug_path_ = json["recognize_debug_path"].get<std::string>();
-	mode_ = static_cast<recognize_mode>(json["recognize_start_mode"].get<int>());
+	mode_ = static_cast<game_mode>(json["recognize_start_mode"].get<int>());
 
 	capture_end_ = false;
 
@@ -64,14 +64,14 @@ void recognize_thread::process()
 
 		switch(mode_)
 		{
-		case recognize_mode::wait_character:
-			wait_character(org_mat);
+		case game_mode::wait_character_selection:
+			wait_character_selection(org_mat);
 			break;
-		case recognize_mode::wait_reset:
-			wait_reset(org_mat);
+		case game_mode::wait_start:
+			wait_start(org_mat);
 			break;
-		case recognize_mode::wait_init:
-			debug_init_game(org_mat);
+		case game_mode::wait_init:
+			debug_wait_init(org_mat);
 			break;
 		}
 
@@ -92,7 +92,7 @@ cv::Mat recognize_thread::pop()
 	return org_mat;
 }
 
-void recognize_thread::wait_character(const cv::Mat& org_mat)
+void recognize_thread::wait_character_selection(const cv::Mat& org_mat)
 {
 	const auto logger = spdlog::get(logger_main);
 
@@ -116,11 +116,11 @@ void recognize_thread::wait_character(const cv::Mat& org_mat)
 	if (!checkRange(channels[r], true, pos, 0, 100)) return;
 
 	// ƒŠƒZƒbƒg‘Ò‚¿‚É‘JˆÚ
-	mode_ = recognize_mode::wait_reset;
-	logger->info("No:{} recognize_mode:wait_reset", cur_no_);
+	mode_ = game_mode::wait_start;
+	logger->info("No:{} game_mode:wait_start", cur_no_);
 }
 
-void recognize_thread::wait_reset(const cv::Mat& org_mat)
+void recognize_thread::wait_start(const cv::Mat& org_mat)
 {
 	const auto logger = spdlog::get(logger_main);
 
@@ -133,11 +133,11 @@ void recognize_thread::wait_reset(const cv::Mat& org_mat)
 	}
 
 	// ‰Šú‰»‘Ò‚¿‚É‘JˆÚ
-	mode_ = recognize_mode::wait_init;
-	logger->info("No:{} recognize_mode:wait_init", cur_no_);
+	mode_ = game_mode::wait_init;
+	logger->info("No:{} game_mode:wait_init", cur_no_);
 }
 
-void recognize_thread::debug_init_game(const cv::Mat& org_mat) const
+void recognize_thread::debug_wait_init(const cv::Mat& org_mat) const
 {
 	if (!settings::debug)
 	{

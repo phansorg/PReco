@@ -5,9 +5,9 @@
 #include <mutex>
 #include "player.h"
 
-enum class recognize_mode {
-	wait_character,
-	wait_reset,
+enum class game_mode {
+	wait_character_selection,
+	wait_start,
 	wait_init,
 };
 
@@ -20,7 +20,7 @@ class recognize_thread
 
 	bool debug_write_;
 	std::string debug_path_;
-	recognize_mode mode_;
+	game_mode mode_;
 
 	bool capture_end_;
 
@@ -47,8 +47,8 @@ private:
 	void process();
 	cv::Mat pop();
 
-	void wait_character(const cv::Mat& org_mat);
-	void wait_reset(const cv::Mat& org_mat);
-	void debug_init_game(const cv::Mat& org_mat) const;
+	void wait_character_selection(const cv::Mat& org_mat);
+	void wait_start(const cv::Mat& org_mat);
+	void debug_wait_init(const cv::Mat& org_mat) const;
 };
 
