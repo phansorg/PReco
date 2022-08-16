@@ -15,20 +15,31 @@ player::player(const int player_idx)
 		json["player_field_w"].get<int>(),
 		json["player_field_h"].get<int>()
 	);
-	draw1_frame_rect_ = cv::Rect(
+
+	draw_frame_rects_[0] = cv::Rect(
 		json["player_draw1_x"][player_idx_].get<int>(),
 		json["player_draw1_y"].get<int>(),
 		field_frame_rect_.width / cols,
 		field_frame_rect_.height / rows
 	);
-	draw2_frame_rect_ = cv::Rect(
+	draw_frame_rects_[1] = cv::Rect(draw_frame_rects_[0]);
+	draw_frame_rects_[1].y += draw_frame_rects_[1].height;
+
+	draw_frame_rects_[2] = cv::Rect(
 		json["player_draw2_x"][player_idx_].get<int>(),
 		json["player_draw2_y"].get<int>(),
-		draw1_frame_rect_.width * 4 / 5,
-		draw1_frame_rect_.height * 4 / 5
+		draw_frame_rects_[0].width * 4 / 5,
+		draw_frame_rects_[0].height * 4 / 5
 	);
+	draw_frame_rects_[3] = cv::Rect(draw_frame_rects_[2]);
+	draw_frame_rects_[3].y += draw_frame_rects_[3].height;
 
-	init_draw_cell_rects();
+	for(int idx = 0; idx < draw_cells; idx++)
+	{
+		draw_cell_rects_[idx] = to_recognize_rect(draw_frame_rects_[idx]);
+
+	}
+
 	init_wait_character_selection_rect();
 	init_wait_reset_rect();
 }
@@ -36,27 +47,14 @@ player::player(const int player_idx)
 // ============================================================
 // rect
 // ============================================================
-void player::init_draw_cell_rects()
+cv::Rect player::to_recognize_rect(const cv::Rect frame)
 {
-	auto frame = draw1_frame_rect_;
-	auto x = frame.x + frame.width / 4;
-	auto y = frame.y + frame.height / 4;
-	auto w = frame.width / 2;
-	auto h = frame.height / 2;
-	draw_cell_rects_.emplace_back(x, y, w, h);
-
-	y += frame.height;
-	draw_cell_rects_.emplace_back(x, y, w, h);
-
-	frame = draw2_frame_rect_;
-	x = frame.x + frame.width / 4;
-	y = frame.y + frame.height / 4;
-	w = frame.width / 2;
-	h = frame.height / 2;
-	draw_cell_rects_.emplace_back(x, y, w, h);
-
-	y += frame.height;
-	draw_cell_rects_.emplace_back(x, y, w, h);
+	return {
+		frame.x + frame.width / 4,
+		frame.y + frame.height / 4,
+		frame.width / 2,
+		frame.height / 2
+	};
 }
 
 void player::init_wait_character_selection_rect()
