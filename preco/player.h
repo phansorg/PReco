@@ -10,24 +10,27 @@ class player
 	int field_y_;
 	int field_w_;
 	int field_h_;
-	int next1_x_;
-	int next1_y_;
-	int next1_w_;
-	int next1_h_;
-	int next2_x_;
-	int next2_y_;
-	int next2_w_;
-	int next2_h_;
+	int draw1_x_;
+	int draw1_y_;
+	int draw1_w_;
+	int draw1_h_;
+	int draw2_x_;
+	int draw2_y_;
+	int draw2_w_;
+	int draw2_h_;
+	int draw_histories_size_;
 
 	cv::Rect field_rect_;
-	std::vector<cv::Rect> next_rect_vector_;
+	std::vector<cv::Rect> draw_rect_vector_;
 	cv::Rect wait_character_selection_rect_;
 	cv::Rect wait_reset_rect_;
 
 	void init_field_rect();
-	void init_next_rect_vector();
+	void init_draw_rect_vector();
 	void init_wait_character_selection_rect();
 	void init_wait_reset_rect();
+
+	std::vector<cv::Mat> prev_draw_vector_;
 
 public:
 	explicit player(int player_idx);

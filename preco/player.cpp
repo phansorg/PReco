@@ -13,18 +13,18 @@ player::player(const int player_idx)
 	field_y_ = json["player_field_y"].get<int>();
 	field_w_ = json["player_field_w"].get<int>();
 	field_h_ = json["player_field_h"].get<int>();
-	next1_x_ = json["player_next1_x"][player_idx_].get<int>();
-	next1_y_ = json["player_next1_y"].get<int>();
-	next2_x_ = json["player_next2_x"][player_idx_].get<int>();
-	next2_y_ = json["player_next2_y"].get<int>();
+	draw1_x_ = json["player_draw1_x"][player_idx_].get<int>();
+	draw1_y_ = json["player_draw1_y"].get<int>();
+	draw2_x_ = json["player_draw2_x"][player_idx_].get<int>();
+	draw2_y_ = json["player_draw2_y"].get<int>();
 
-	next1_w_ = field_w_ / cols;
-	next1_h_ = field_h_ / rows;
-	next2_w_ = next1_w_ * 4 / 5;
-	next2_h_ = next1_h_ * 4 / 5;
+	draw1_w_ = field_w_ / cols;
+	draw1_h_ = field_h_ / rows;
+	draw2_w_ = draw1_w_ * 4 / 5;
+	draw2_h_ = draw1_h_ * 4 / 5;
 
 	init_field_rect();
-	init_next_rect_vector();
+	init_draw_rect_vector();
 	init_wait_character_selection_rect();
 	init_wait_reset_rect();
 }
@@ -43,25 +43,25 @@ void player::init_field_rect()
 	);
 }
 
-void player::init_next_rect_vector()
+void player::init_draw_rect_vector()
 {
-	auto x = next1_x_ + next1_w_ / 4;
-	auto y = next1_y_ + next1_h_ / 4;
-	auto w = next1_w_ / 2;
-	auto h = next1_h_ / 2;
-	next_rect_vector_.emplace_back(x, y, w, h);
+	auto x = draw1_x_ + draw1_w_ / 4;
+	auto y = draw1_y_ + draw1_h_ / 4;
+	auto w = draw1_w_ / 2;
+	auto h = draw1_h_ / 2;
+	draw_rect_vector_.emplace_back(x, y, w, h);
 
-	y += next1_h_;
-	next_rect_vector_.emplace_back(x, y, w, h);
+	y += draw1_h_;
+	draw_rect_vector_.emplace_back(x, y, w, h);
 
-	x = next2_x_ + next2_w_ / 4;
-	y = next2_y_ + next2_h_ / 4;
-	w = next2_w_ / 2;
-	h = next2_h_ / 2;
-	next_rect_vector_.emplace_back(x, y, w, h);
+	x = draw2_x_ + draw2_w_ / 4;
+	y = draw2_y_ + draw2_h_ / 4;
+	w = draw2_w_ / 2;
+	h = draw2_h_ / 2;
+	draw_rect_vector_.emplace_back(x, y, w, h);
 
-	y += next2_h_;
-	next_rect_vector_.emplace_back(x, y, w, h);
+	y += draw2_h_;
+	draw_rect_vector_.emplace_back(x, y, w, h);
 }
 
 void player::init_wait_character_selection_rect()
@@ -141,10 +141,10 @@ void player::debug_wait_init(const cv::Mat& debug_mat) const
 	auto y2 = rect.y + rect.height;
 	rectangle(debug_mat, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(0, 0, 255), 1);
 
-	// nextÇÃê¸Çï`âÊ
-	for (const auto& next_rect : next_rect_vector_)
+	// drawÇÃê¸Çï`âÊ
+	for (const auto& draw_rect : draw_rect_vector_)
 	{
-		rect = next_rect;
+		rect = draw_rect;
 		x1 = rect.x;
 		y1 = rect.y;
 		x2 = rect.x + rect.width;
