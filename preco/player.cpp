@@ -20,28 +20,28 @@ player::player(const int player_idx)
 	cell_width_ = field_frame_rect_.width / cols;
 	cell_height_ = field_frame_rect_.height / rows;
 
-	draw_frame_rects_[0] = cv::Rect(
-		json["player_draw1_x"][player_idx_].get<int>(),
-		json["player_draw1_y"].get<int>(),
+	nxt_frame_rects_[0] = cv::Rect(
+		json["player_nxt1_x"][player_idx_].get<int>(),
+		json["player_nxt1_y"].get<int>(),
 		cell_width_,
 		cell_height_
 	);
-	draw_frame_rects_[1] = cv::Rect(draw_frame_rects_[0]);
-	draw_frame_rects_[1].y += draw_frame_rects_[1].height;
+	nxt_frame_rects_[1] = cv::Rect(nxt_frame_rects_[0]);
+	nxt_frame_rects_[1].y += nxt_frame_rects_[1].height;
 
-	draw_frame_rects_[2] = cv::Rect(
-		json["player_draw2_x"][player_idx_].get<int>(),
-		json["player_draw2_y"].get<int>(),
+	nxt_frame_rects_[2] = cv::Rect(
+		json["player_nxt2_x"][player_idx_].get<int>(),
+		json["player_nxt2_y"].get<int>(),
 		cell_width_ * 4 / 5,
 		cell_height_ * 4 / 5
 	);
-	draw_frame_rects_[3] = cv::Rect(draw_frame_rects_[2]);
-	draw_frame_rects_[3].y += draw_frame_rects_[3].height;
+	nxt_frame_rects_[3] = cv::Rect(nxt_frame_rects_[2]);
+	nxt_frame_rects_[3].y += nxt_frame_rects_[3].height;
 
 	// ÇªÇÃëºRectÇÃåvéZ
-	for(int idx = 0; idx < draw_cells; idx++)
+	for(int idx = 0; idx < nxt_cells; idx++)
 	{
-		draw_cell_rects_[idx] = to_recognize_rect(draw_frame_rects_[idx]);
+		nxt_cell_rects_[idx] = to_recognize_rect(nxt_frame_rects_[idx]);
 
 	}
 	init_wait_character_selection_rect();
@@ -49,7 +49,7 @@ player::player(const int player_idx)
 	init_wait_end_rect();
 
 	histories_size_ = json["game_histories_size"].get<int>();
-	draw_mse_ring_buffer_ = ring_buffer(mse_init, histories_size_, draw_cells);
+	nxt_mse_ring_buffer_ = ring_buffer(mse_init, histories_size_, nxt_cells);
 }
 
 // ============================================================
@@ -147,18 +147,18 @@ bool player::game(int cur_no, const cv::Mat& org_mat, const std::list<cv::Mat>& 
 	const auto logger = spdlog::get(logger_main);
 	SPDLOG_LOGGER_TRACE(logger, "game No:{}", cur_no);
 
-	return wait_draw_stable(org_mat, mat_histories);
+	return wait_nxt_stable(org_mat, mat_histories);
 }
 
-bool player::wait_draw_stable(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)
+bool player::wait_nxt_stable(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)
 {
 	const auto logger = spdlog::get(logger_main);
 
-	draw_mse_ring_buffer_.next_record();
-	for (int idx = 0; idx < draw_cells; idx++)
+	nxt_mse_ring_buffer_.nxtt_record();
+	for (int idx = 0; idx < nxt_cells; idx++)
 	{
-		const auto& org_roi = org_mat(draw_cell_rects_[idx]);
-		const auto history_roi = mat_histories.front()(draw_cell_rects_[idx]);
+		const auto& org_roi = org_mat(nxt_cell_rects_[idx]);
+		const auto history_roi = mat_histories.front()(nxt_cell_rects_[idx]);
 
 		cv::Mat diff_mat;
 		subtract(org_roi, history_roi, diff_mat);
@@ -166,14 +166,14 @@ bool player::wait_draw_stable(const cv::Mat& org_mat, const std::list<cv::Mat>& 
 		pow(diff_mat, 2, pow_mat);
 		auto mean = cv::mean(pow_mat);
 
-		draw_mse_ring_buffer_.set(static_cast<int>(mean[r] + mean[b] + mean[b]), idx);
+		nxt_mse_ring_buffer_.set(static_cast<int>(mean[r] + mean[b] + mean[b]), idx);
 	}
 
 	SPDLOG_LOGGER_TRACE(logger, "game mse1:{} mse2:{} mse3:{} mse4:{}",
-		draw_mse_ring_buffer_.get(0),
-		draw_mse_ring_buffer_.get(1),
-		draw_mse_ring_buffer_.get(2),
-		draw_mse_ring_buffer_.get(3)
+		nxt_mse_ring_buffer_.get(0),
+		nxt_mse_ring_buffer_.get(1),
+		nxt_mse_ring_buffer_.get(2),
+		nxt_mse_ring_buffer_.get(3)
 	);
 	return false;
 }
@@ -192,10 +192,10 @@ void player::debug_render(const cv::Mat& debug_mat) const
 	auto y2 = rect.y + rect.height;
 	rectangle(debug_mat, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(0, 0, 255), 1);
 
-	// drawÇÃê¸Çï`âÊ
-	for (const auto& draw_rect : draw_cell_rects_)
+	// nxtÇÃê¸Çï`âÊ
+	for (const auto& nxt_rect : nxt_cell_rects_)
 	{
-		rect = draw_rect;
+		rect = nxt_rect;
 		x1 = rect.x;
 		y1 = rect.y;
 		x2 = rect.x + rect.width;

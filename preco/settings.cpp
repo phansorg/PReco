@@ -41,10 +41,10 @@ void settings::init()
     json["player_field_y"] = 106;
     json["player_field_w"] = 258;
     json["player_field_h"] = 480;
-    json["player_draw1_x"] = { 479, 757 };
-    json["player_draw1_y"] = 109;
-    json["player_draw2_x"] = { 514, 732 };
-    json["player_draw2_y"] = 196;
+    json["player_nex1_x"] = { 479, 757 };
+    json["player_nex1_y"] = 109;
+    json["player_nex2_x"] = { 514, 732 };
+    json["player_nex2_y"] = 196;
 
     json["game_debug_write"] = true;
     json["game_debug_path"] = "D:/puyo/movie/image_debug";
