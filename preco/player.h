@@ -24,11 +24,15 @@ private:
 	int player_idx_;
 
 	cv::Rect field_frame_rect_;
-	cv::Rect draw_frame_rects_[draw_cells];
+	int cell_width_;
+	int cell_height_;
 
+	cv::Rect draw_frame_rects_[draw_cells];
 	cv::Rect draw_cell_rects_[draw_cells];
+
 	cv::Rect wait_character_selection_rect_;
 	cv::Rect wait_reset_rect_;
+	cv::Rect wait_end_rect_;
 
 	int histories_size_;
 	ring_buffer draw_mse_ring_buffer_;
@@ -36,6 +40,7 @@ private:
 	static cv::Rect to_recognize_rect(cv::Rect frame);
 	void init_wait_character_selection_rect();
 	void init_wait_reset_rect();
+	void init_wait_end_rect();
 
 public:
 	explicit player(int player_idx);
@@ -44,5 +49,5 @@ public:
 	[[nodiscard]] bool wait_game_start(const cv::Mat& org_mat) const;
 	[[nodiscard]] bool game(int cur_no, const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
 	[[nodiscard]] bool wait_draw_stable(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
-	void debug_wait_init(const cv::Mat& debug_mat) const;
+	void debug_render(const cv::Mat& debug_mat) const;
 };

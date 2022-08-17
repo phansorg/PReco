@@ -17,12 +17,14 @@ player::player(const int player_idx)
 		json["player_field_w"].get<int>(),
 		json["player_field_h"].get<int>()
 	);
+	cell_width_ = field_frame_rect_.width / cols;
+	cell_height_ = field_frame_rect_.height / rows;
 
 	draw_frame_rects_[0] = cv::Rect(
 		json["player_draw1_x"][player_idx_].get<int>(),
 		json["player_draw1_y"].get<int>(),
-		field_frame_rect_.width / cols,
-		field_frame_rect_.height / rows
+		cell_width_,
+		cell_height_
 	);
 	draw_frame_rects_[1] = cv::Rect(draw_frame_rects_[0]);
 	draw_frame_rects_[1].y += draw_frame_rects_[1].height;
@@ -30,8 +32,8 @@ player::player(const int player_idx)
 	draw_frame_rects_[2] = cv::Rect(
 		json["player_draw2_x"][player_idx_].get<int>(),
 		json["player_draw2_y"].get<int>(),
-		draw_frame_rects_[0].width * 4 / 5,
-		draw_frame_rects_[0].height * 4 / 5
+		cell_width_ * 4 / 5,
+		cell_height_ * 4 / 5
 	);
 	draw_frame_rects_[3] = cv::Rect(draw_frame_rects_[2]);
 	draw_frame_rects_[3].y += draw_frame_rects_[3].height;
@@ -44,6 +46,7 @@ player::player(const int player_idx)
 	}
 	init_wait_character_selection_rect();
 	init_wait_reset_rect();
+	init_wait_end_rect();
 
 	histories_size_ = json["game_histories_size"].get<int>();
 	draw_mse_ring_buffer_ = ring_buffer(mse_init, histories_size_, draw_cells);
@@ -82,8 +85,21 @@ void player::init_wait_reset_rect()
 	wait_reset_rect_ = cv::Rect(
 		field_frame_rect_.x + field_frame_rect_.width / 2,
 		field_frame_rect_.y + field_frame_rect_.height / 2,
-		field_frame_rect_.width / 10,
-		field_frame_rect_.height / 10
+		cell_width_,
+		cell_height_
+	);
+}
+
+void player::init_wait_end_rect()
+{
+	// Šp‚Ì—Ìˆæ‚ª‘S‚Ä—Î‚Å‚ ‚ê‚ÎOK
+	const auto x = player_idx_ == p1 ?
+		field_frame_rect_.x : field_frame_rect_.x + field_frame_rect_.width - 5;
+	wait_end_rect_ = cv::Rect(
+		x,
+		field_frame_rect_.y + field_frame_rect_.height + 5,
+		5,
+		5
 	);
 }
 
@@ -166,7 +182,7 @@ bool player::wait_draw_stable(const cv::Mat& org_mat, const std::list<cv::Mat>& 
 // debug
 // ============================================================
 
-void player::debug_wait_init(const cv::Mat& debug_mat) const
+void player::debug_render(const cv::Mat& debug_mat) const
 {
 	// field‚Ìü‚ğ•`‰æ
 	auto rect = field_frame_rect_;
@@ -186,4 +202,15 @@ void player::debug_wait_init(const cv::Mat& debug_mat) const
 		y2 = rect.y + rect.height;
 		rectangle(debug_mat, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(0, 0, 255), 1);
 	}
+
+	// end‚Ìü‚ğ•`‰æ
+	rect = wait_end_rect_;
+	x1 = rect.x;
+	y1 = rect.y;
+	x2 = rect.x + rect.width;
+	y2 = rect.y + rect.height;
+	rectangle(debug_mat, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(0, 0, 0), 1);
+
+	
+
 }

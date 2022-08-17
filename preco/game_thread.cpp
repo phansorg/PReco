@@ -72,8 +72,8 @@ void game_thread::process()
 			wait_game_start(org_mat);
 			break;
 		case game_mode::wait_game_end:
-			debug_wait_game_init(org_mat);
 			wait_game_end(org_mat);
+			debug_render(org_mat);
 			break;
 		}
 
@@ -152,20 +152,16 @@ void game_thread::wait_game_end(const cv::Mat& org_mat)
 // debug
 // ============================================================
 
-void game_thread::debug_wait_game_init(const cv::Mat& org_mat) const
+void game_thread::debug_render(const cv::Mat& org_mat) const
 {
 	if (!settings::debug) return;
 
 	const auto debug_mat = org_mat.clone();
 	for (const auto& player : players_)
 	{
-		player->debug_wait_init(debug_mat);
+		player->debug_render(debug_mat);
 	}
-	write_debug_image_file(debug_mat);
-}
 
-void game_thread::write_debug_image_file(const cv::Mat& debug_mat) const
-{
 	// 出力ファイル名
 	std::ostringstream file_name;
 	file_name << cur_no_ << ".png";

@@ -50,7 +50,6 @@ private:
 	void wait_game_start(const cv::Mat& org_mat);
 	void wait_game_end(const cv::Mat& org_mat);
 
-	void debug_wait_game_init(const cv::Mat& org_mat) const;
-	void write_debug_image_file(const cv::Mat& debug_mat) const;
+	void debug_render(const cv::Mat& org_mat) const;
 };
 
