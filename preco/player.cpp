@@ -20,28 +20,28 @@ player::player(const int player_idx)
 	cell_width_ = field_frame_rect_.width / cols;
 	cell_height_ = field_frame_rect_.height / rows;
 
-	nxt_frame_rects_[0] = cv::Rect(
+	nxt_cell_rects_[0] = cv::Rect(
 		json["player_nxt1_x"][player_idx_].get<int>(),
 		json["player_nxt1_y"].get<int>(),
 		cell_width_,
 		cell_height_
 	);
-	nxt_frame_rects_[1] = cv::Rect(nxt_frame_rects_[0]);
-	nxt_frame_rects_[1].y += nxt_frame_rects_[1].height;
+	nxt_cell_rects_[1] = cv::Rect(nxt_cell_rects_[0]);
+	nxt_cell_rects_[1].y += nxt_cell_rects_[1].height;
 
-	nxt_frame_rects_[2] = cv::Rect(
+	nxt_cell_rects_[2] = cv::Rect(
 		json["player_nxt2_x"][player_idx_].get<int>(),
 		json["player_nxt2_y"].get<int>(),
 		cell_width_ * 4 / 5,
 		cell_height_ * 4 / 5
 	);
-	nxt_frame_rects_[3] = cv::Rect(nxt_frame_rects_[2]);
-	nxt_frame_rects_[3].y += nxt_frame_rects_[3].height;
+	nxt_cell_rects_[3] = cv::Rect(nxt_cell_rects_[2]);
+	nxt_cell_rects_[3].y += nxt_cell_rects_[3].height;
 
 	// ‚»‚Ì‘¼Rect‚ÌŒvŽZ
 	for(int idx = 0; idx < nxt_cells; idx++)
 	{
-		nxt_recognize_rects_[idx] = to_recognize_rect(nxt_frame_rects_[idx]);
+		nxt_recognize_rects_[idx] = to_recognize_rect(nxt_cell_rects_[idx]);
 
 	}
 	init_wait_character_selection_rect();
@@ -55,13 +55,13 @@ player::player(const int player_idx)
 // ============================================================
 // rect
 // ============================================================
-cv::Rect player::to_recognize_rect(const cv::Rect frame)
+cv::Rect player::to_recognize_rect(const cv::Rect cell)
 {
 	return {
-		frame.x + frame.width / 4,
-		frame.y + frame.height / 4,
-		frame.width / 2,
-		frame.height / 2
+		cell.x + cell.width / 4,
+		cell.y + cell.height / 4,
+		cell.width / 2,
+		cell.height / 2
 	};
 }
 

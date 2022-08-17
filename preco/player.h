@@ -27,7 +27,7 @@ private:
 	int cell_width_;
 	int cell_height_;
 
-	cv::Rect nxt_frame_rects_[nxt_cells];
+	cv::Rect nxt_cell_rects_[nxt_cells];
 	cv::Rect nxt_recognize_rects_[nxt_cells];
 
 	cv::Rect wait_character_selection_rect_;
@@ -37,7 +37,7 @@ private:
 	int histories_size_;
 	ring_buffer nxt_mse_ring_buffer_;
 
-	static cv::Rect to_recognize_rect(cv::Rect frame);
+	static cv::Rect to_recognize_rect(cv::Rect cell);
 	void init_wait_character_selection_rect();
 	void init_wait_reset_rect();
 	void init_wait_end_rect();
