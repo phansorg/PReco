@@ -28,7 +28,7 @@ private:
 	int cell_height_;
 
 	cv::Rect nxt_frame_rects_[nxt_cells];
-	cv::Rect nxt_cell_rects_[nxt_cells];
+	cv::Rect nxt_recognize_rects_[nxt_cells];
 
 	cv::Rect wait_character_selection_rect_;
 	cv::Rect wait_reset_rect_;

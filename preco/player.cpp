@@ -41,7 +41,7 @@ player::player(const int player_idx)
 	// ‚»‚Ì‘¼Rect‚ÌŒvŽZ
 	for(int idx = 0; idx < nxt_cells; idx++)
 	{
-		nxt_cell_rects_[idx] = to_recognize_rect(nxt_frame_rects_[idx]);
+		nxt_recognize_rects_[idx] = to_recognize_rect(nxt_frame_rects_[idx]);
 
 	}
 	init_wait_character_selection_rect();
@@ -157,8 +157,8 @@ bool player::wait_nxt_stable(const cv::Mat& org_mat, const std::list<cv::Mat>& m
 	nxt_mse_ring_buffer_.next_record();
 	for (int idx = 0; idx < nxt_cells; idx++)
 	{
-		const auto& org_roi = org_mat(nxt_cell_rects_[idx]);
-		const auto history_roi = mat_histories.front()(nxt_cell_rects_[idx]);
+		const auto& org_roi = org_mat(nxt_recognize_rects_[idx]);
+		const auto history_roi = mat_histories.front()(nxt_recognize_rects_[idx]);
 
 		cv::Mat diff_mat;
 		subtract(org_roi, history_roi, diff_mat);
@@ -193,7 +193,7 @@ void player::debug_render(const cv::Mat& debug_mat) const
 	rectangle(debug_mat, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(0, 0, 255), 1);
 
 	// nxt‚Ìü‚ð•`‰æ
-	for (const auto& nxt_rect : nxt_cell_rects_)
+	for (const auto& nxt_rect : nxt_recognize_rects_)
 	{
 		rect = nxt_rect;
 		x1 = rect.x;
