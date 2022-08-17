@@ -3,6 +3,7 @@
 #include <list>
 #include <opencv2/core/types.hpp>
 
+#include "cell.h"
 #include "ring_buffer.h"
 
 class player
@@ -12,7 +13,7 @@ public:
 	static constexpr int p2 = 1;
 	static constexpr int rows = 12;
 	static constexpr int cols = 6;
-	static constexpr int nxt_cells = 4;
+	static constexpr int nxt_count = 4;
 
 	static constexpr int b = 0;
 	static constexpr int g = 1;
@@ -26,11 +27,9 @@ private:
 	cv::Rect field_frame_rect_;
 	int cell_width_;
 	int cell_height_;
-	cv::Rect field_cell_rects_[rows][cols];
-	cv::Rect field_recognize_rects_[rows][cols];
+	cell field_cells_[rows][cols];
 
-	cv::Rect nxt_cell_rects_[nxt_cells];
-	cv::Rect nxt_recognize_rects_[nxt_cells];
+	cell nxt_cells_[nxt_count];
 
 	cv::Rect wait_character_selection_rect_;
 	cv::Rect wait_reset_rect_;
@@ -39,8 +38,7 @@ private:
 	int histories_size_;
 	ring_buffer nxt_mse_ring_buffer_;
 
-	static cv::Rect to_recognize_rect(cv::Rect cell);
-	void init_field_recognize_rects();
+	void init_field_cells();
 	void init_wait_character_selection_rect();
 	void init_wait_reset_rect();
 	void init_wait_end_rect();

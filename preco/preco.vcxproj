@@ -140,6 +140,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="capture_thread.cpp" />
+    <ClCompile Include="cell.cpp" />
     <ClCompile Include="logger.cpp" />
     <ClCompile Include="player.cpp" />
     <ClCompile Include="preco.cpp" />
@@ -150,6 +151,7 @@
   <ItemGroup>
     <ClInclude Include="base_thread.h" />
     <ClInclude Include="capture_thread.h" />
+    <ClInclude Include="cell.h" />
     <ClInclude Include="logger.h" />
     <ClInclude Include="player.h" />
     <ClInclude Include="game_thread.h" />
