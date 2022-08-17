@@ -12,7 +12,7 @@ public:
 	static constexpr int p2 = 1;
 	static constexpr int rows = 12;
 	static constexpr int cols = 6;
-	static constexpr int nex_cells = 4;
+	static constexpr int nxt_cells = 4;
 
 	static constexpr int b = 0;
 	static constexpr int g = 1;
@@ -27,15 +27,15 @@ private:
 	int cell_width_;
 	int cell_height_;
 
-	cv::Rect nex_frame_rects_[nex_cells];
-	cv::Rect nex_cell_rects_[nex_cells];
+	cv::Rect nxt_frame_rects_[nxt_cells];
+	cv::Rect nxt_cell_rects_[nxt_cells];
 
 	cv::Rect wait_character_selection_rect_;
 	cv::Rect wait_reset_rect_;
 	cv::Rect wait_end_rect_;
 
 	int histories_size_;
-	ring_buffer nex_mse_ring_buffer_;
+	ring_buffer nxt_mse_ring_buffer_;
 
 	static cv::Rect to_recognize_rect(cv::Rect frame);
 	void init_wait_character_selection_rect();
@@ -48,6 +48,6 @@ public:
 	[[nodiscard]] bool wait_character_selection(const cv::Mat& org_mat) const;
 	[[nodiscard]] bool wait_game_start(const cv::Mat& org_mat) const;
 	[[nodiscard]] bool game(int cur_no, const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
-	[[nodiscard]] bool wait_nex_stable(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
+	[[nodiscard]] bool wait_nxt_stable(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
 	void debug_render(const cv::Mat& debug_mat) const;
 };

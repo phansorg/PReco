@@ -154,7 +154,7 @@ bool player::wait_nxt_stable(const cv::Mat& org_mat, const std::list<cv::Mat>& m
 {
 	const auto logger = spdlog::get(logger_main);
 
-	nxt_mse_ring_buffer_.nxtt_record();
+	nxt_mse_ring_buffer_.next_record();
 	for (int idx = 0; idx < nxt_cells; idx++)
 	{
 		const auto& org_roi = org_mat(nxt_cell_rects_[idx]);

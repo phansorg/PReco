@@ -17,6 +17,6 @@ public:
 	void next_record();
 	void prev_record();
 	void set(int value = 0, int row = 0, int col = 0);
-	int get(int row = 0, int col = 0) const;
+	[[nodiscard]] int get(int row = 0, int col = 0) const;
 };
 
