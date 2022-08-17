@@ -9,7 +9,7 @@ player::player(const int player_idx)
 {
 	player_idx_ = player_idx;
 
-	// RectÇÃê›íËì«Ç›çûÇ›
+	// field
 	auto& json = settings::get_instance()->json;
 	field_frame_rect_ = cv::Rect(
 		json["player_field_x"][player_idx_].get<int>(),
@@ -20,6 +20,7 @@ player::player(const int player_idx)
 	cell_width_ = field_frame_rect_.width / cols;
 	cell_height_ = field_frame_rect_.height / rows;
 
+	// nxt1
 	nxt_cell_rects_[0] = cv::Rect(
 		json["player_nxt1_x"][player_idx_].get<int>(),
 		json["player_nxt1_y"].get<int>(),
@@ -29,6 +30,7 @@ player::player(const int player_idx)
 	nxt_cell_rects_[1] = cv::Rect(nxt_cell_rects_[0]);
 	nxt_cell_rects_[1].y += nxt_cell_rects_[1].height;
 
+	// nxt2
 	nxt_cell_rects_[2] = cv::Rect(
 		json["player_nxt2_x"][player_idx_].get<int>(),
 		json["player_nxt2_y"].get<int>(),
@@ -38,18 +40,19 @@ player::player(const int player_idx)
 	nxt_cell_rects_[3] = cv::Rect(nxt_cell_rects_[2]);
 	nxt_cell_rects_[3].y += nxt_cell_rects_[3].height;
 
+	// histories
+	histories_size_ = json["game_histories_size"].get<int>();
+	nxt_mse_ring_buffer_ = ring_buffer(mse_init, histories_size_, nxt_cells);
+
 	// ÇªÇÃëºRectÇÃåvéZ
+	init_field_recognize_rects();
 	for(int idx = 0; idx < nxt_cells; idx++)
 	{
 		nxt_recognize_rects_[idx] = to_recognize_rect(nxt_cell_rects_[idx]);
-
 	}
 	init_wait_character_selection_rect();
 	init_wait_reset_rect();
 	init_wait_end_rect();
-
-	histories_size_ = json["game_histories_size"].get<int>();
-	nxt_mse_ring_buffer_ = ring_buffer(mse_init, histories_size_, nxt_cells);
 }
 
 // ============================================================
@@ -63,6 +66,29 @@ cv::Rect player::to_recognize_rect(const cv::Rect cell)
 		cell.width / 2,
 		cell.height / 2
 	};
+}
+
+void player::init_field_recognize_rects()
+{
+	const auto width = field_frame_rect_.width;
+	const auto height = field_frame_rect_.height;
+	for (int row = 0; row < rows; row++)
+	{
+		const auto y1 = height * row / rows + field_frame_rect_.y;
+		const auto y2 = height * (row + 1) / rows + field_frame_rect_.y;
+		for (int col = 0; col < cols; col++)
+		{
+			const auto x1 = width * col / cols + field_frame_rect_.x;
+			const auto x2 = width * (col + 1) / cols + field_frame_rect_.x;
+			field_cell_rects_[row][col] = cv::Rect(
+				x1,
+				y1,
+				x2 - x1,
+				y2 - y1
+			);
+			field_recognize_rects_[row][col] = to_recognize_rect(field_cell_rects_[row][col]);
+		}
+	}
 }
 
 void player::init_wait_character_selection_rect()
@@ -185,32 +211,32 @@ bool player::wait_nxt_stable(const cv::Mat& org_mat, const std::list<cv::Mat>& m
 void player::debug_render(const cv::Mat& debug_mat) const
 {
 	// fieldÇÃê¸Çï`âÊ
-	auto rect = field_frame_rect_;
-	auto x1 = rect.x;
-	auto y1 = rect.y;
-	auto x2 = rect.x + rect.width;
-	auto y2 = rect.y + rect.height;
-	rectangle(debug_mat, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(0, 0, 255), 1);
-
+	render_rect(debug_mat, field_frame_rect_, cv::Scalar(0, 0, 255));
+	for (int row = 0; row < rows; row++)
+	{
+		for (int col = 0; col < cols; col++)
+		{
+			render_rect(debug_mat, field_cell_rects_[row][col], cv::Scalar(0, 0, 255));
+			render_rect(debug_mat, field_recognize_rects_[row][col], cv::Scalar(0, 0, 255));
+		}
+	}
 	// nxtÇÃê¸Çï`âÊ
 	for (const auto& nxt_rect : nxt_recognize_rects_)
 	{
-		rect = nxt_rect;
-		x1 = rect.x;
-		y1 = rect.y;
-		x2 = rect.x + rect.width;
-		y2 = rect.y + rect.height;
-		rectangle(debug_mat, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(0, 0, 255), 1);
+		render_rect(debug_mat, nxt_rect, cv::Scalar(0, 0, 255));
 	}
 
 	// endÇÃê¸Çï`âÊ
-	rect = wait_end_rect_;
-	x1 = rect.x;
-	y1 = rect.y;
-	x2 = rect.x + rect.width;
-	y2 = rect.y + rect.height;
-	rectangle(debug_mat, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(0, 0, 0), 1);
-
-	
-
+	render_rect(debug_mat, wait_end_rect_, cv::Scalar(0, 0, 0));
 }
+
+void player::render_rect(const cv::Mat& debug_mat, const cv::Rect rect, const cv::Scalar& color) const
+{
+	const auto x1 = rect.x;
+	const auto y1 = rect.y;
+	const auto x2 = rect.x + rect.width - 1;
+	const auto y2 = rect.y + rect.height - 1;
+	rectangle(debug_mat, cv::Point(x1, y1), cv::Point(x2, y2), color, 1);
+}
+
+

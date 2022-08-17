@@ -26,6 +26,8 @@ private:
 	cv::Rect field_frame_rect_;
 	int cell_width_;
 	int cell_height_;
+	cv::Rect field_cell_rects_[rows][cols];
+	cv::Rect field_recognize_rects_[rows][cols];
 
 	cv::Rect nxt_cell_rects_[nxt_cells];
 	cv::Rect nxt_recognize_rects_[nxt_cells];
@@ -38,6 +40,7 @@ private:
 	ring_buffer nxt_mse_ring_buffer_;
 
 	static cv::Rect to_recognize_rect(cv::Rect cell);
+	void init_field_recognize_rects();
 	void init_wait_character_selection_rect();
 	void init_wait_reset_rect();
 	void init_wait_end_rect();
@@ -50,4 +53,6 @@ public:
 	[[nodiscard]] bool game(int cur_no, const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
 	[[nodiscard]] bool wait_nxt_stable(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
 	void debug_render(const cv::Mat& debug_mat) const;
+	void render_rect(const cv::Mat& debug_mat, cv::Rect rect, const cv::Scalar& color) const;
+
 };
