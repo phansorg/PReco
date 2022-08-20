@@ -2,6 +2,8 @@
 
 #include <opencv2/core/types.hpp>
 
+#include "ring_buffer.h"
+
 class cell
 {
 public:
@@ -10,5 +12,6 @@ public:
 
 	cv::Rect rect;
 	cv::Rect recognize_rect;
+	ring_buffer mse_ring_buffer;
 
 };

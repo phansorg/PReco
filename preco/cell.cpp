@@ -1,9 +1,12 @@
 ﻿#include "cell.h"
 
+#include "settings.h"
+
 cell::cell()
 {
 	rect = cv::Rect(0, 0, 0, 0);
 	recognize_rect = cv::Rect(0, 0, 0, 0);
+	mse_ring_buffer = ring_buffer(settings::mse_init, settings::history_max);
 }
 
 void cell::set_rect(const cv::Rect in_rect)

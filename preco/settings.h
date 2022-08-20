@@ -5,6 +5,11 @@
 // Singleton
 class settings
 {
+public:
+	static constexpr int mse_init = 10000;
+	static constexpr int history_max = 5;
+
+private:
 	settings() = default;
 
 	static settings* instance_;

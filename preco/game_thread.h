@@ -21,7 +21,6 @@ class game_thread
 	bool debug_write_;
 	std::string debug_path_;
 	game_mode mode_;
-	unsigned long long histories_max_;
 
 	bool capture_end_;
 

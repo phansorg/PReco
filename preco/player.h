@@ -4,7 +4,6 @@
 #include <opencv2/core/types.hpp>
 
 #include "cell.h"
-#include "ring_buffer.h"
 
 class player
 {
@@ -23,8 +22,6 @@ public:
 	static constexpr int g = 1;
 	static constexpr int r = 2;
 
-	static constexpr int mse_init = 10000;
-
 private:
 	int player_idx_;
 
@@ -38,9 +35,6 @@ private:
 	cv::Rect wait_character_selection_rect_;
 	cv::Rect wait_reset_rect_;
 	cv::Rect wait_end_rect_;
-
-	int histories_max_;
-	ring_buffer nxt_mse_ring_buffer_;
 
 	void init_field_cells();
 	void init_wait_character_selection_rect();

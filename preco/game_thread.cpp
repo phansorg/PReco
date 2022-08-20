@@ -13,7 +13,6 @@ game_thread::game_thread()
 	debug_write_ = json["game_debug_write"].get<bool>();
 	debug_path_ = json["game_debug_path"].get<std::string>();
 	mode_ = static_cast<game_mode>(json["game_start_mode"].get<int>());
-	histories_max_ = json["game_histories_max"].get<int>();
 
 	capture_end_ = false;
 
@@ -98,7 +97,7 @@ cv::Mat game_thread::pop()
 void game_thread::add_history(const cv::Mat& org_mat)
 {
 	mat_histories_.push_front(org_mat);
-	if (mat_histories_.size() > histories_max_)
+	if (mat_histories_.size() > settings::history_max)
 	{
 		mat_histories_.pop_back();
 	}
@@ -138,10 +137,12 @@ void game_thread::wait_game_end(const cv::Mat& org_mat)
 {
 	const auto logger = spdlog::get(logger_main);
 
+	bool game_end = true;
 	for (const auto& player : players_)
 	{
-		if (!player->game(cur_no_, org_mat, mat_histories_)) return;
+		game_end &= player->game(cur_no_, org_mat, mat_histories_);
 	}
+	if (!game_end) return;
 
 	mode_ = game_mode::wait_game_start;
 	logger->info("No:{} game_mode:{}", cur_no_, static_cast<int>(mode_));

@@ -28,7 +28,7 @@ void settings::init()
 	*/
 
     // 設定ファイルが存在しない場合、デフォルト値で作成
-    json["capture_mode"] = capture_mode::jpeg;
+	json["capture_mode"] = capture_mode::jpeg;
     json["capture_path"] = "D:/puyo/movie/image_target";
     json["capture_start_no"] = 4210;
     json["capture_last_no"] = 4400;
@@ -49,7 +49,6 @@ void settings::init()
     json["game_debug_write"] = true;
     json["game_debug_path"] = "D:/puyo/movie/image_debug";
     json["game_start_mode"] = game_mode::wait_character_selection;
-    json["game_histories_max"] = 5;
 
     std::ofstream ofs(settings_file_name);
     ofs << std::setw(json_indent) << json << std::endl;
