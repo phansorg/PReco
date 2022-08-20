@@ -22,6 +22,10 @@ public:
 	static constexpr int g = 1;
 	static constexpr int r = 2;
 
+	static constexpr int h = 0;
+	static constexpr int s = 1;
+	static constexpr int v = 2;
+
 private:
 	int player_idx_;
 

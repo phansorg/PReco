@@ -4,11 +4,14 @@
 
 #include "settings.h"
 
+
+
 cell::cell()
 {
 	frame_rect = cv::Rect(0, 0, 0, 0);
 	recognize_rect = cv::Rect(0, 0, 0, 0);
 
+	recognize_color_ = color::none;
 	mse_ring_buffer_ = ring_buffer(settings::mse_init, settings::history_max);
 	stabilize_count_ = 0;
 
@@ -27,16 +30,22 @@ void cell::set_rect(const cv::Rect in_rect)
 	recognize_rect.height = frame_rect.height / 2;
 }
 
+void cell::set_recognize_color(const color recognize_color)
+{
+	recognize_color_ = recognize_color;
+}
+
 void cell::set_mse(const int mse)
 {
 	mse_ring_buffer_.next_record();
 	mse_ring_buffer_.set(mse);
 	
-	if (mse >= 100)
+	if (mse >= mse_threshold_)
 	{
 		stabilize_count_ = 0;
 		return;
 	}
+
 	stabilize_count_++;
 }
 
@@ -57,22 +66,48 @@ bool cell::is_stabilized() const
 
 void cell::debug_render(const cv::Mat& debug_mat) const
 {
-	auto color = cv::Scalar(0, 0, 255);
-	render_rect(debug_mat, frame_rect, color);
+	// frame_rect
+	cv::Scalar bgr_scalar;
+	switch (recognize_color_)
+	{
+	case color::none:
+		bgr_scalar = cv::Scalar(0, 0, 0);
+		break;
+	case color::r:
+		bgr_scalar = cv::Scalar(0, 0, 255);
+		break;
+	case color::g:
+		bgr_scalar = cv::Scalar(0, 255, 0);
+		break;
+	case color::b:
+		bgr_scalar = cv::Scalar(255, 0, 0);
+		break;
+	case color::y:
+		bgr_scalar = cv::Scalar(0, 255, 255);
+		break;
+	case color::p:
+		bgr_scalar = cv::Scalar(255, 0, 255);
+		break;
+	case color::jam:
+		bgr_scalar = cv::Scalar(255, 255, 255);
+		break;
+	}
+	render_rect(debug_mat, frame_rect, bgr_scalar);
 
+	// recognize_rect
 	if (is_stabilized())
-		color = cv::Scalar(0, 0, 0);
+		bgr_scalar = cv::Scalar(0, 0, 0);
 	else if (is_stabilizing())
-		color = cv::Scalar(0, 255, 0);
+		bgr_scalar = cv::Scalar(0, 255, 0);
 	else
-		color = cv::Scalar(0, 0, 255);
-	render_rect(debug_mat, recognize_rect, color);
+		bgr_scalar = cv::Scalar(0, 0, 255);
+	render_rect(debug_mat, recognize_rect, bgr_scalar);
 }
-void cell::render_rect(const cv::Mat& debug_mat, const cv::Rect rect, const cv::Scalar& color) const
+void cell::render_rect(const cv::Mat& debug_mat, const cv::Rect rect, const cv::Scalar& bgr_scalar) const
 {
 	const auto x1 = rect.x;
 	const auto y1 = rect.y;
 	const auto x2 = rect.x + rect.width - 1;
 	const auto y2 = rect.y + rect.height - 1;
-	rectangle(debug_mat, cv::Point(x1, y1), cv::Point(x2, y2), color, 2);
+	rectangle(debug_mat, cv::Point(x1, y1), cv::Point(x2, y2), bgr_scalar, 2);
 }

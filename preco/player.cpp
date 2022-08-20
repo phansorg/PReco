@@ -166,13 +166,47 @@ bool player::wait_nxt_stable(const cv::Mat& org_mat, const std::list<cv::Mat>& m
 			const auto& org_roi = org_mat(nxt_cell.recognize_rect);
 			const auto history_roi = mat_histories.front()(nxt_cell.recognize_rect);
 
+			// 対象領域のピクセル毎に二乗誤差を計算
 			cv::Mat diff_mat;
 			subtract(org_roi, history_roi, diff_mat);
 			cv::Mat pow_mat;
 			pow(diff_mat, 2, pow_mat);
-			auto mse_rgb = cv::mean(pow_mat);
 
-			nxt_cell.set_mse(static_cast<int>(mse_rgb[r] + mse_rgb[b] + mse_rgb[b]));
+			// 対象領域のピクセルで平均をとり、全チャネルで合計した値をセット
+			const auto before_stabilized = nxt_cell.is_stabilized();
+			auto mse_bgr = cv::mean(pow_mat);
+			nxt_cell.set_mse(static_cast<int>(mse_bgr[r] + mse_bgr[g] + mse_bgr[b]));
+
+			// 安定状態に遷移した場合、色を更新
+			if (!before_stabilized && nxt_cell.is_stabilized())
+			{
+				auto mean_bgr = cv::mean(org_roi);
+				const auto r_val = static_cast<int>(mean_bgr[r]);
+				const auto g_val = static_cast<int>(mean_bgr[g]);
+				const auto b_val = static_cast<int>(mean_bgr[b]);
+
+				auto set_color = color::none;
+				if (r_val > 150 && g_val < 80 && b_val < 80)
+					set_color = color::r;
+				else if (r_val < 110 && g_val > 180 && b_val < 100)
+					set_color = color::g;
+				else if (r_val < 90 && g_val < 130 && b_val > 170)
+					set_color = color::b;
+				else if (r_val > 210 && g_val > 180 && b_val < 150)
+					set_color = color::y;
+				else if (r_val > 130 && g_val < 100 && b_val > 170)
+					set_color = color::p;
+				else if (r_val > 180 && g_val > 180 && b_val > 180)
+					set_color = color::jam;
+				nxt_cell.set_recognize_color(set_color);
+
+				const auto logger = spdlog::get(logger_main);
+				SPDLOG_LOGGER_TRACE(logger, "r:{} g:{} b{}", 
+					static_cast<int>(r_val),
+					static_cast<int>(g_val),
+					static_cast<int>(b_val)
+				);
+			}
 		}
 	}
 
