@@ -136,6 +136,7 @@ void game_thread::wait_game_start(const cv::Mat& org_mat)
 void game_thread::wait_game_end(const cv::Mat& org_mat)
 {
 	const auto logger = spdlog::get(logger_main);
+	SPDLOG_LOGGER_TRACE(logger, "game No:{}", cur_no_);
 
 	bool game_end = true;
 	for (const auto& player : players_)

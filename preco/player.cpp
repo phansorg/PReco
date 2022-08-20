@@ -27,7 +27,7 @@ player::player(const int player_idx)
 		cell_width_,
 		cell_height_
 	));
-	auto clone_rect = nxt_cells_[0][axis].rect;
+	auto clone_rect = nxt_cells_[0][axis].frame_rect;
 	clone_rect.y += clone_rect.height;
 	nxt_cells_[0][child].set_rect(clone_rect);
 
@@ -38,7 +38,7 @@ player::player(const int player_idx)
 		cell_width_ * 4 / 5,
 		cell_height_ * 4 / 5
 	));
-	clone_rect = nxt_cells_[1][axis].rect;
+	clone_rect = nxt_cells_[1][axis].frame_rect;
 	clone_rect.y += clone_rect.height;
 	nxt_cells_[1][child].set_rect(clone_rect);
 
@@ -102,14 +102,15 @@ void player::init_wait_reset_rect()
 void player::init_wait_end_rect()
 {
 	// äpÇÃóÃàÊÇ™ëSÇƒóŒÇ≈Ç†ÇÍÇŒOK
+	constexpr auto width = 10;
 	const auto x = player_idx_ == p1 ?
-		field_frame_rect_.x : field_frame_rect_.x + field_frame_rect_.width - 5;
-	wait_end_rect_ = cv::Rect(
+		field_frame_rect_.x : field_frame_rect_.x + field_frame_rect_.width - width;
+	end_cell_.set_rect(cv::Rect(
 		x,
-		field_frame_rect_.y + field_frame_rect_.height + 5,
-		5,
-		5
-	);
+		field_frame_rect_.y + field_frame_rect_.height + width,
+		width,
+		width
+	));
 }
 
 // ============================================================
@@ -153,9 +154,6 @@ bool player::wait_game_start(const cv::Mat& org_mat) const
 
 bool player::game(int cur_no, const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)
 {
-	const auto logger = spdlog::get(logger_main);
-	SPDLOG_LOGGER_TRACE(logger, "game No:{}", cur_no);
-
 	return wait_nxt_stable(org_mat, mat_histories);
 }
 
@@ -190,13 +188,11 @@ void player::debug_render(const cv::Mat& debug_mat) const
 	const auto logger = spdlog::get(logger_main);
 
 	// fieldÇÃê¸Çï`âÊ
-	render_rect(debug_mat, field_frame_rect_, cv::Scalar(0, 0, 255));
 	for (const auto& field_row : field_cells_)
 	{
 		for (const auto& field_cell : field_row)
 		{
-			render_rect(debug_mat, field_cell.rect, cv::Scalar(0, 0, 255));
-			render_rect(debug_mat, field_cell.recognize_rect, cv::Scalar(0, 0, 255));
+			field_cell.debug_render(debug_mat);
 		}
 	}
 	// nxtÇÃê¸Çï`âÊ
@@ -204,13 +200,12 @@ void player::debug_render(const cv::Mat& debug_mat) const
 	{
 		for (const auto& nxt_cell : nxt_child_cells)
 		{
-			render_rect(debug_mat, nxt_cell.rect, cv::Scalar(0, 0, 255));
-			render_rect(debug_mat, nxt_cell.recognize_rect, cv::Scalar(0, 0, 255));
+			nxt_cell.debug_render(debug_mat);
 		}
 	}
 
 	// endÇÃê¸Çï`âÊ
-	render_rect(debug_mat, wait_end_rect_, cv::Scalar(0, 0, 0));
+	end_cell_.debug_render(debug_mat);
 
 	// nxtÇÃmse
 	SPDLOG_LOGGER_TRACE(logger, "game mse1:{} mse2:{} mse3:{} mse4:{}",
@@ -221,11 +216,4 @@ void player::debug_render(const cv::Mat& debug_mat) const
 	);
 }
 
-void player::render_rect(const cv::Mat& debug_mat, const cv::Rect rect, const cv::Scalar& color) const
-{
-	const auto x1 = rect.x;
-	const auto y1 = rect.y;
-	const auto x2 = rect.x + rect.width - 1;
-	const auto y2 = rect.y + rect.height - 1;
-	rectangle(debug_mat, cv::Point(x1, y1), cv::Point(x2, y2), color, 1);
-}
+

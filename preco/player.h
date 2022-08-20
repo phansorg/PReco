@@ -32,9 +32,10 @@ private:
 
 	cell nxt_cells_[nxt_max][nxt_child_max];
 
+	cell end_cell_;
+
 	cv::Rect wait_character_selection_rect_;
 	cv::Rect wait_reset_rect_;
-	cv::Rect wait_end_rect_;
 
 	void init_field_cells();
 	void init_wait_character_selection_rect();
@@ -49,6 +50,5 @@ public:
 	[[nodiscard]] bool game(int cur_no, const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
 	[[nodiscard]] bool wait_nxt_stable(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
 	void debug_render(const cv::Mat& debug_mat) const;
-	void render_rect(const cv::Mat& debug_mat, cv::Rect rect, const cv::Scalar& color) const;
 
 };
