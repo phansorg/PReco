@@ -8,10 +8,15 @@ class cell
 {
 public:
 	cell();
-	void set_rect(cv::Rect in_rect);
 
 	cv::Rect rect;
 	cv::Rect recognize_rect;
-	ring_buffer mse_ring_buffer;
+
+	void set_rect(cv::Rect in_rect);
+	void set_mse(int mse);
+	[[nodiscard]] int get_mse() const;
+
+private:
+	ring_buffer mse_ring_buffer_;
 
 };

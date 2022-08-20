@@ -174,8 +174,7 @@ bool player::wait_nxt_stable(const cv::Mat& org_mat, const std::list<cv::Mat>& m
 			pow(diff_mat, 2, pow_mat);
 			auto mse_rgb = cv::mean(pow_mat);
 
-			nxt_cell.mse_ring_buffer.next_record();
-			nxt_cell.mse_ring_buffer.set(static_cast<int>(mse_rgb[r] + mse_rgb[b] + mse_rgb[b]));
+			nxt_cell.set_mse(static_cast<int>(mse_rgb[r] + mse_rgb[b] + mse_rgb[b]));
 		}
 	}
 
@@ -215,10 +214,10 @@ void player::debug_render(const cv::Mat& debug_mat) const
 
 	// nxt‚Ìmse
 	SPDLOG_LOGGER_TRACE(logger, "game mse1:{} mse2:{} mse3:{} mse4:{}",
-		nxt_cells_[0][axis].mse_ring_buffer.get(),
-		nxt_cells_[0][child].mse_ring_buffer.get(),
-		nxt_cells_[1][axis].mse_ring_buffer.get(),
-		nxt_cells_[1][child].mse_ring_buffer.get()
+		nxt_cells_[0][axis].get_mse(),
+		nxt_cells_[0][child].get_mse(),
+		nxt_cells_[1][axis].get_mse(),
+		nxt_cells_[1][child].get_mse()
 	);
 }
 
