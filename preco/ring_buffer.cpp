@@ -7,7 +7,7 @@ ring_buffer::ring_buffer(const int init_value, const int records, const int rows
 	cols_ = cols;
 
 	cur_record_ = 0;
-	record_size_ = rows_ * cols_;
+	record_length_ = rows_ * cols_;
 	const auto buffer_size = records_ * rows_ * cols_;
 	histories_ = std::make_unique<int[]>(buffer_size);
 	for (auto idx = 0; idx < buffer_size; idx++)
@@ -28,12 +28,12 @@ void ring_buffer::prev_record()
 
 void ring_buffer::set(const int value, const int row, const int col)
 {
-	const auto idx = cur_record_ * record_size_ + row * cols_ + col;
+	const auto idx = cur_record_ * record_length_ + row * cols_ + col;
 	histories_[idx] = value;
 }
 
 int ring_buffer::get(const int row, const int col) const
 {
-	const auto idx = cur_record_ * record_size_ + row * cols_ + col;
+	const auto idx = cur_record_ * record_length_ + row * cols_ + col;
 	return histories_[idx];
 }

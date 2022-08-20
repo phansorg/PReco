@@ -49,7 +49,7 @@ void settings::init()
     json["game_debug_write"] = true;
     json["game_debug_path"] = "D:/puyo/movie/image_debug";
     json["game_start_mode"] = game_mode::wait_character_selection;
-    json["game_histories_size"] = 5;
+    json["game_histories_max"] = 5;
 
     std::ofstream ofs(settings_file_name);
     ofs << std::setw(json_indent) << json << std::endl;

@@ -62,7 +62,7 @@ void capture_thread::read_jpeg()
 	for (; cur_no_ <= last_no_; cur_no_++)
 	{
 		// 後続スレッドのキューが埋まっている場合、一旦抜ける
-		if (game_thread_ptr_->is_mat_queue_max())
+		if (game_thread_ptr_->is_capture_mat_queue_max())
 		{
 			return;
 		}
@@ -79,7 +79,7 @@ void capture_thread::read_jpeg()
 		auto mat = cv::imread(file_path.string());
 
 		// 後続スレッドのキューに追加
-		game_thread_ptr_->add_mat_queue(mat);
+		game_thread_ptr_->add_capture_mat_queue(mat);
 	}
 
 	// 全ファイル処理した場合、スレッドループ終了

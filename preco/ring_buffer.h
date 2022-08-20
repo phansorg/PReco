@@ -8,7 +8,7 @@ class ring_buffer
 	int cols_;
 
 	int cur_record_;
-	int record_size_;
+	int record_length_;
 	std::unique_ptr<int[]> histories_;
 
 

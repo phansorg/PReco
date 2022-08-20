@@ -13,7 +13,7 @@ game_thread::game_thread()
 	debug_write_ = json["game_debug_write"].get<bool>();
 	debug_path_ = json["game_debug_path"].get<std::string>();
 	mode_ = static_cast<game_mode>(json["game_start_mode"].get<int>());
-	histories_size_ = json["game_histories_size"].get<int>();
+	histories_max_ = json["game_histories_max"].get<int>();
 
 	capture_end_ = false;
 
@@ -46,20 +46,20 @@ void game_thread::set_capture_end()
 	capture_end_ = true;
 }
 
-bool game_thread::is_mat_queue_max() const
+bool game_thread::is_capture_mat_queue_max() const
 {
-	return mat_queue_.size() >= mat_queue_max_size_;
+	return capture_mat_queue_.size() >= capture_mat_queue_max_;
 }
 
-void game_thread::add_mat_queue(const cv::Mat& mat)
+void game_thread::add_capture_mat_queue(const cv::Mat& mat)
 {
-	std::lock_guard lock(mat_queue_mutex_);
-	mat_queue_.push(mat);
+	std::lock_guard lock(capture_mat_queue_mutex_);
+	capture_mat_queue_.push(mat);
 }
 
 void game_thread::process()
 {
-	while (!mat_queue_.empty())
+	while (!capture_mat_queue_.empty())
 	{
 		cv::Mat org_mat = pop();
 
@@ -81,7 +81,7 @@ void game_thread::process()
 		cur_no_++;
 	}
 
-	if (capture_end_ && mat_queue_.empty())
+	if (capture_end_ && capture_mat_queue_.empty())
 	{
 		request_end();
 	}
@@ -89,16 +89,16 @@ void game_thread::process()
 
 cv::Mat game_thread::pop()
 {
-	std::lock_guard lock(mat_queue_mutex_);
-	cv::Mat org_mat = mat_queue_.front();
-	mat_queue_.pop();
+	std::lock_guard lock(capture_mat_queue_mutex_);
+	cv::Mat org_mat = capture_mat_queue_.front();
+	capture_mat_queue_.pop();
 	return org_mat;
 }
 
 void game_thread::add_history(const cv::Mat& org_mat)
 {
 	mat_histories_.push_front(org_mat);
-	if (mat_histories_.size() > histories_size_)
+	if (mat_histories_.size() > histories_max_)
 	{
 		mat_histories_.pop_back();
 	}

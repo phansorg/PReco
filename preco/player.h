@@ -35,7 +35,7 @@ private:
 	cv::Rect wait_reset_rect_;
 	cv::Rect wait_end_rect_;
 
-	int histories_size_;
+	int histories_max_;
 	ring_buffer nxt_mse_ring_buffer_;
 
 	void init_field_cells();

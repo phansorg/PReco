@@ -43,8 +43,8 @@ player::player(const int player_idx)
 	nxt_cells_[3].set_rect(clone_rect);
 
 	// histories
-	histories_size_ = json["game_histories_size"].get<int>();
-	nxt_mse_ring_buffer_ = ring_buffer(mse_init, histories_size_, nxt_count);
+	histories_max_ = json["game_histories_max"].get<int>();
+	nxt_mse_ring_buffer_ = ring_buffer(mse_init, histories_max_, nxt_count);
 
 	// ‚»‚Ì‘¼Rect‚ÌŒvŽZ
 	init_field_cells();
