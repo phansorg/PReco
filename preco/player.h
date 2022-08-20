@@ -11,9 +11,13 @@ class player
 public:
 	static constexpr int p1 = 0;
 	static constexpr int p2 = 1;
+	static constexpr int axis = 0;
+	static constexpr int child = 1;
+
 	static constexpr int rows = 12;
 	static constexpr int cols = 6;
-	static constexpr int nxt_count = 4;
+	static constexpr int nxt_max = 2;
+	static constexpr int nxt_child_max = 2;
 
 	static constexpr int b = 0;
 	static constexpr int g = 1;
@@ -29,7 +33,7 @@ private:
 	int cell_height_;
 	cell field_cells_[rows][cols];
 
-	cell nxt_cells_[nxt_count];
+	cell nxt_cells_[nxt_max][nxt_child_max];
 
 	cv::Rect wait_character_selection_rect_;
 	cv::Rect wait_reset_rect_;
