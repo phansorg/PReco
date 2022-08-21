@@ -135,5 +135,5 @@ void cell::render_rect(const cv::Mat& debug_mat, const cv::Rect rect, const cv::
 	const auto y1 = rect.y;
 	const auto x2 = rect.x + rect.width - 1;
 	const auto y2 = rect.y + rect.height - 1;
-	rectangle(debug_mat, cv::Point(x1, y1), cv::Point(x2, y2), bgr_scalar, 2);
+	rectangle(debug_mat, cv::Point(x1, y1), cv::Point(x2, y2), bgr_scalar, 1);
 }

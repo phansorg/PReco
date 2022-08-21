@@ -29,14 +29,17 @@ private:
 	cell nxt_cells_[nxt_max][nxt_child_max];
 
 	cell end_cell_;
+	cell combo_cell_;
 
 	cv::Rect wait_character_selection_rect_;
 	cv::Rect wait_reset_rect_;
 
 	void init_field_cells();
+	void init_combo_cell();
+	void init_end_cell();
+
 	void init_wait_character_selection_rect();
 	void init_wait_reset_rect();
-	void init_wait_end_rect();
 
 public:
 	explicit player(int player_idx);

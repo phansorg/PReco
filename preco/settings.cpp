@@ -45,6 +45,8 @@ void settings::init()
     json["player_nxt1_y"] = 109;
     json["player_nxt2_x"] = { 514, 732 };
     json["player_nxt2_y"] = 196;
+    json["player_score_x"] = { 234, 833 };
+    json["player_score_y"] = 589;
 
     json["game_debug_write"] = true;
     json["game_debug_path"] = "D:/puyo/movie/image_debug";

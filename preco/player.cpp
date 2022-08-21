@@ -42,11 +42,20 @@ player::player(const int player_idx)
 	clone_rect.y += clone_rect.height;
 	nxt_cells_[1][child].set_rect(clone_rect);
 
+	// combo
+	combo_cell_.set_rect(cv::Rect(
+		json["player_score_x"][player_idx_].get<int>() + 4,
+		json["player_score_y"].get<int>() + 1,
+		cell_width_ / 2,
+		cell_height_ / 4
+	));
+
 	// その他Rectの計算
 	init_field_cells();
+	init_combo_cell();
+	init_end_cell();
 	init_wait_character_selection_rect();
 	init_wait_reset_rect();
-	init_wait_end_rect();
 }
 
 // ============================================================
@@ -74,6 +83,34 @@ void player::init_field_cells()
 	}
 }
 
+void player::init_combo_cell()
+{
+	// スコアの左端が変化したらcombo
+	const auto width = cell_width_ / 2;
+	const auto x = player_idx_ == p1 ?
+		field_frame_rect_.x : field_frame_rect_.x + field_frame_rect_.width - width;
+	end_cell_.set_rect(cv::Rect(
+		x,
+		field_frame_rect_.y + field_frame_rect_.height + width / 2,
+		width,
+		width
+	));
+}
+
+void player::init_end_cell()
+{
+	// 角の領域が全て緑であればend
+	const auto width = cell_width_ / 2;
+	const auto x = player_idx_ == p1 ?
+		field_frame_rect_.x : field_frame_rect_.x + field_frame_rect_.width - width;
+	end_cell_.set_rect(cv::Rect(
+		x,
+		field_frame_rect_.y + field_frame_rect_.height + width / 2,
+		width,
+		width
+	));
+}
+
 void player::init_wait_character_selection_rect()
 {
 	// 1P盤面の上半分領域が全て赤であればOK
@@ -97,20 +134,6 @@ void player::init_wait_reset_rect()
 		cell_width_,
 		cell_height_
 	);
-}
-
-void player::init_wait_end_rect()
-{
-	// 角の領域が全て緑であればOK
-	constexpr auto width = 10;
-	const auto x = player_idx_ == p1 ?
-		field_frame_rect_.x : field_frame_rect_.x + field_frame_rect_.width - width;
-	end_cell_.set_rect(cv::Rect(
-		x,
-		field_frame_rect_.y + field_frame_rect_.height + width,
-		width,
-		width
-	));
 }
 
 // ============================================================
@@ -217,6 +240,9 @@ void player::debug_render(const cv::Mat& debug_mat) const
 			nxt_cell.debug_render(debug_mat);
 		}
 	}
+
+	// comboの線を描画
+	combo_cell_.debug_render(debug_mat);
 
 	// endの線を描画
 	end_cell_.debug_render(debug_mat);
