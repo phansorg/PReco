@@ -8,6 +8,7 @@
 player::player(const int player_idx)
 {
 	player_idx_ = player_idx;
+	move_next_idx_ = 0;
 
 	// field
 	auto& json = settings::get_instance()->json;

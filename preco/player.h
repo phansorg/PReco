@@ -20,6 +20,7 @@ public:
 
 private:
 	int player_idx_;
+	int move_next_idx_;
 
 	cv::Rect field_frame_rect_;
 	int cell_width_;
@@ -28,7 +29,6 @@ private:
 
 	cell nxt_cells_[nxt_max][nxt_child_max];
 	std::vector<color> nxt_records_;
-	int move_next_idx_;
 
 	cell end_cell_;
 	cell combo_cell_;
