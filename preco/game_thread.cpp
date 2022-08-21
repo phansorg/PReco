@@ -67,8 +67,8 @@ void game_thread::process()
 		case game_mode::wait_character_selection:
 			wait_character_selection(org_mat);
 			break;
-		case game_mode::wait_game_start:
-			wait_game_start(org_mat);
+		case game_mode::wait_game_reset:
+			wait_game_reset(org_mat);
 			break;
 		case game_mode::wait_game_end:
 			wait_game_end(org_mat);
@@ -116,17 +116,17 @@ void game_thread::wait_character_selection(const cv::Mat& org_mat)
 		if (!player->wait_character_selection(org_mat)) return;
 	}
 
-	mode_ = game_mode::wait_game_start;
+	mode_ = game_mode::wait_game_reset;
 	logger->info("No:{} game_mode:{}", cur_no_, static_cast<int>(mode_));
 }
 
-void game_thread::wait_game_start(const cv::Mat& org_mat)
+void game_thread::wait_game_reset(const cv::Mat& org_mat)
 {
 	const auto logger = spdlog::get(logger_main);
 
 	for (const auto& player : players_)
 	{
-		if (!player->wait_game_start(org_mat)) return;
+		if (!player->wait_game_reset(org_mat)) return;
 	}
 
 	mode_ = game_mode::wait_game_end;
@@ -145,7 +145,7 @@ void game_thread::wait_game_end(const cv::Mat& org_mat)
 	}
 	if (!game_end) return;
 
-	mode_ = game_mode::wait_game_start;
+	mode_ = game_mode::wait_game_reset;
 	logger->info("No:{} game_mode:{}", cur_no_, static_cast<int>(mode_));
 }
 

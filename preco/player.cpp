@@ -165,12 +165,30 @@ bool player::wait_character_selection(const cv::Mat& org_mat) const
 	return true;
 }
 
-bool player::wait_game_start(const cv::Mat& org_mat) const
+bool player::wait_game_reset(const cv::Mat& org_mat)
 {
 	// 盤面の中央領域が全て黒であればOK
 	cv::Point* pos = nullptr;
 	if (const auto roi_mat = org_mat(wait_reset_rect_);
 		!checkRange(roi_mat, true, pos, 0, 30)) return false;
+
+	// fieldをリセット
+	for (auto& field_row : field_cells_)
+	{
+		for (auto& field_cell : field_row)
+		{
+			field_cell.reset();
+		}
+	}
+
+	// nxtをリセット
+	for (auto& nxt_child_cells : nxt_cells_)
+	{
+		for (auto& nxt_cell : nxt_child_cells)
+		{
+			nxt_cell.reset();
+		}
+	}
 
 	return true;
 }

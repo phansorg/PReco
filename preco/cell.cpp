@@ -5,17 +5,15 @@
 #include "logger.h"
 #include "settings.h"
 
-
-
 cell::cell()
 {
 	frame_rect = cv::Rect(0, 0, 0, 0);
 	recognize_rect = cv::Rect(0, 0, 0, 0);
 
+	game_color = color::none;
 	recognize_color_ = color::none;
 	mse_ring_buffer_ = ring_buffer(settings::mse_init, settings::history_max);
 	stabilize_count_ = 0;
-
 }
 
 void cell::set_rect(const cv::Rect in_rect)
@@ -29,6 +27,14 @@ void cell::set_rect(const cv::Rect in_rect)
 	recognize_rect.y = frame_rect.y + frame_rect.height / 4;
 	recognize_rect.width = frame_rect.width / 2;
 	recognize_rect.height = frame_rect.height / 2;
+}
+
+void cell::reset()
+{
+	game_color = color::none;
+	recognize_color_ = color::none;
+	mse_ring_buffer_.reset(settings::mse_init);
+	stabilize_count_ = 0;
 }
 
 void cell::set_recognize_color(const cv::Scalar& bgr_scalar)

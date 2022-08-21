@@ -7,7 +7,7 @@
 
 enum class game_mode {
 	wait_character_selection,
-	wait_game_start,
+	wait_game_reset,
 	wait_game_end,
 };
 
@@ -46,7 +46,7 @@ private:
 	void add_history(const cv::Mat& org_mat);
 
 	void wait_character_selection(const cv::Mat& org_mat);
-	void wait_game_start(const cv::Mat& org_mat);
+	void wait_game_reset(const cv::Mat& org_mat);
 	void wait_game_end(const cv::Mat& org_mat);
 
 	void debug_render(const cv::Mat& org_mat) const;

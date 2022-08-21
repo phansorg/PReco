@@ -16,6 +16,15 @@ ring_buffer::ring_buffer(const int init_value, const int records, const int rows
 	}
 }
 
+void ring_buffer::reset(const int init_value)
+{
+	const auto buffer_size = records_ * rows_ * cols_;
+	for (auto idx = 0; idx < buffer_size; idx++)
+	{
+		histories_[idx] = init_value;
+	}
+}
+
 void ring_buffer::next_record()
 {
 	cur_record_ = (cur_record_ + 1) % records_;

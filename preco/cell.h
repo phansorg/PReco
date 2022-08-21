@@ -30,7 +30,11 @@ public:
 	cv::Rect frame_rect;
 	cv::Rect recognize_rect;
 
+	color game_color;
+
 	void set_rect(cv::Rect in_rect);
+
+	void reset();
 
 	void set_recognize_color(const cv::Scalar& bgr_scalar);
 
