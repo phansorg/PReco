@@ -27,26 +27,41 @@ player::player(const int player_idx)
 	cell_height_ = field_frame_rect_.height / rows;
 
 	// nxt1
-	nxt_cells_[0][axis].set_rect(cv::Rect(
+	auto row = 0;
+	auto col = axis;
+	nxt_cells_[row][col].row = row;
+	nxt_cells_[row][col].col = col;
+	nxt_cells_[row][col].set_rect(cv::Rect(
 		json["player_nxt1_x"][player_idx_].get<int>(),
 		json["player_nxt1_y"].get<int>(),
 		cell_width_,
 		cell_height_
 	));
-	auto clone_rect = nxt_cells_[0][axis].frame_rect;
+
+	auto clone_rect = nxt_cells_[row][col].frame_rect;
+	col = child;
 	clone_rect.y += clone_rect.height;
-	nxt_cells_[0][child].set_rect(clone_rect);
+	nxt_cells_[row][col].row = row;
+	nxt_cells_[row][col].col = col;
+	nxt_cells_[row][col].set_rect(clone_rect);
 
 	// nxt2
-	nxt_cells_[1][axis].set_rect(cv::Rect(
+	row = 1;
+	col = axis;
+	nxt_cells_[row][col].row = row;
+	nxt_cells_[row][col].col = col;
+	nxt_cells_[row][col].set_rect(cv::Rect(
 		json["player_nxt2_x"][player_idx_].get<int>(),
 		json["player_nxt2_y"].get<int>(),
 		cell_width_ * 4 / 5,
 		cell_height_ * 4 / 5
 	));
-	clone_rect = nxt_cells_[1][axis].frame_rect;
+	clone_rect = nxt_cells_[row][col].frame_rect;
+	col = child;
 	clone_rect.y += clone_rect.height;
-	nxt_cells_[1][child].set_rect(clone_rect);
+	nxt_cells_[row][col].row = 1;
+	nxt_cells_[row][col].col = col;
+	nxt_cells_[row][col].set_rect(clone_rect);
 
 	// combo
 	combo_cell_.set_rect(cv::Rect(
@@ -79,6 +94,8 @@ void player::init_field_cells()
 		{
 			const auto x1 = width * col / cols + field_frame_rect_.x;
 			const auto x2 = width * (col + 1) / cols + field_frame_rect_.x;
+			field_cells_[row][col].row = row;
+			field_cells_[row][col].col = col;
 			field_cells_[row][col].set_rect(cv::Rect(
 				x1,
 				y1,

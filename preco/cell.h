@@ -27,6 +27,9 @@ public:
 
 	cell();
 
+	int row;
+	int col;
+
 	cv::Rect frame_rect;
 	cv::Rect recognize_rect;
 
@@ -37,7 +40,7 @@ public:
 	void reset();
 
 	void update_recognize_color(const cv::Scalar& bgr_scalar);
-	color get_recognize_color() const;
+	[[nodiscard]] color get_recognize_color() const;
 
 	void set_mse(const cv::Scalar& hsv_scalar);
 	[[nodiscard]] int get_mse() const;

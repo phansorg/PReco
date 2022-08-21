@@ -7,6 +7,9 @@
 
 cell::cell()
 {
+	row = -1;
+	col = -1;
+
 	frame_rect = cv::Rect(0, 0, 0, 0);
 	recognize_rect = cv::Rect(0, 0, 0, 0);
 
@@ -59,7 +62,9 @@ void cell::update_recognize_color(const cv::Scalar& bgr_scalar)
 	recognize_color_ = recognize_color;
 
 	const auto logger = spdlog::get(logger_main);
-	SPDLOG_LOGGER_TRACE(logger, "r:{} g:{} b:{} color:{}",
+	SPDLOG_LOGGER_TRACE(logger, "row:{} col:{} r:{} g:{} b:{} color:{}",
+		row,
+		col,
 		static_cast<int>(r_val),
 		static_cast<int>(g_val),
 		static_cast<int>(b_val),
