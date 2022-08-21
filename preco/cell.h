@@ -5,18 +5,26 @@
 #include "ring_buffer.h"
 
 enum class color {
-	none = 0,
-	r = 1,
-	g = 2,
-	b = 3,
-	y = 4,
-	p = 5,
-	jam = 6,
+	r = 0,
+	g = 1,
+	b = 2,
+	y = 3,
+	p = 4,
+	jam = 5,
+	none = 6,
 };
 
 class cell
 {
 public:
+	static constexpr int b = 0;
+	static constexpr int g = 1;
+	static constexpr int r = 2;
+
+	static constexpr int h = 0;
+	static constexpr int s = 1;
+	static constexpr int v = 2;
+
 	cell();
 
 	cv::Rect frame_rect;
@@ -24,9 +32,9 @@ public:
 
 	void set_rect(cv::Rect in_rect);
 
-	void set_recognize_color(color color);
+	void set_recognize_color(const cv::Scalar& bgr_scalar);
 
-	void set_mse(int mse);
+	void set_mse(const cv::Scalar& hsv_scalar);
 	[[nodiscard]] int get_mse() const;
 
 	[[nodiscard]] bool is_stabilizing() const;

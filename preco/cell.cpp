@@ -2,6 +2,7 @@
 
 #include <opencv2/imgproc.hpp>
 
+#include "logger.h"
 #include "settings.h"
 
 
@@ -30,13 +31,38 @@ void cell::set_rect(const cv::Rect in_rect)
 	recognize_rect.height = frame_rect.height / 2;
 }
 
-void cell::set_recognize_color(const color recognize_color)
+void cell::set_recognize_color(const cv::Scalar& bgr_scalar)
 {
+	const auto r_val = static_cast<int>(bgr_scalar[r]);
+	const auto g_val = static_cast<int>(bgr_scalar[g]);
+	const auto b_val = static_cast<int>(bgr_scalar[b]);
+
+	auto recognize_color = color::none;
+	if (r_val > 150 && g_val < 70 && b_val < 80)
+		recognize_color = color::r;
+	else if (r_val < 120 && g_val > 190 && b_val < 100)
+		recognize_color = color::g;
+	else if (r_val < 95 && g_val < 135 && b_val > 170)
+		recognize_color = color::b;
+	else if (r_val > 210 && g_val > 180 && b_val < 160)
+		recognize_color = color::y;
+	else if (r_val > 130 && g_val < 90 && b_val > 170)
+		recognize_color = color::p;
+	else if (r_val > 150 && g_val > 150 && b_val > 150)
+		recognize_color = color::jam;
 	recognize_color_ = recognize_color;
+
+	const auto logger = spdlog::get(logger_main);
+	SPDLOG_LOGGER_TRACE(logger, "r:{} g:{} b:{}",
+		static_cast<int>(r_val),
+		static_cast<int>(g_val),
+		static_cast<int>(b_val)
+	);
 }
 
-void cell::set_mse(const int mse)
+void cell::set_mse(const cv::Scalar& hsv_scalar)
 {
+	const auto mse = static_cast<int>(hsv_scalar[h] + hsv_scalar[s] + hsv_scalar[v]);
 	mse_ring_buffer_.next_record();
 	mse_ring_buffer_.set(mse);
 	

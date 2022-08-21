@@ -127,16 +127,16 @@ bool player::wait_character_selection(const cv::Mat& org_mat) const
 	if (player_idx_ == p1)
 	{
 		// 1P盤面の上半分領域が全て赤であればOK
-		if (!checkRange(channels[b], true, pos, 0, 100)) return false;
-		if (!checkRange(channels[g], true, pos, 0, 100)) return false;
-		if (!checkRange(channels[r], true, pos, 180, 255)) return false;
+		if (!checkRange(channels[cell::b], true, pos, 0, 100)) return false;
+		if (!checkRange(channels[cell::g], true, pos, 0, 100)) return false;
+		if (!checkRange(channels[cell::r], true, pos, 180, 255)) return false;
 	}
 	else
 	{
 		// 2P盤面の下半分領域が全て緑であればOK
-		if (!checkRange(channels[b], true, pos, 0, 100)) return false;
-		if (!checkRange(channels[g], true, pos, 180, 255)) return false;
-		if (!checkRange(channels[r], true, pos, 0, 100)) return false;
+		if (!checkRange(channels[cell::b], true, pos, 0, 100)) return false;
+		if (!checkRange(channels[cell::g], true, pos, 180, 255)) return false;
+		if (!checkRange(channels[cell::r], true, pos, 0, 100)) return false;
 	}
 
 	return true;
@@ -154,58 +154,38 @@ bool player::wait_game_start(const cv::Mat& org_mat) const
 
 bool player::game(int cur_no, const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)
 {
-	return wait_nxt_stable(org_mat, mat_histories);
+	return wait_nxt_stabilize(org_mat, mat_histories);
 }
 
-bool player::wait_nxt_stable(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)
+bool player::wait_nxt_stabilize(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)
 {
 	for (auto& nxt_child_cells : nxt_cells_)
 	{
 		for (auto& nxt_cell : nxt_child_cells)
 		{
+			// 対象領域を取得し、HSVに変換
 			const auto& org_roi = org_mat(nxt_cell.recognize_rect);
-			const auto history_roi = mat_histories.front()(nxt_cell.recognize_rect);
+			cv::Mat org_hsv_mat;
+			cvtColor(org_roi, org_hsv_mat, cv::COLOR_BGR2HSV);
 
-			// 対象領域のピクセル毎に二乗誤差を計算
+			const auto history_roi = mat_histories.front()(nxt_cell.recognize_rect);
+			cv::Mat history_hsv_mat;
+			cvtColor(history_roi, history_hsv_mat, cv::COLOR_BGR2HSV);
+
+			// 対象領域のピクセル毎にMSEを計算
 			cv::Mat diff_mat;
-			subtract(org_roi, history_roi, diff_mat);
+			subtract(org_hsv_mat, history_hsv_mat, diff_mat);
 			cv::Mat pow_mat;
 			pow(diff_mat, 2, pow_mat);
 
-			// 対象領域のピクセルで平均をとり、全チャネルで合計した値をセット
+			// MSEの平均をとり、cellに設定
 			const auto before_stabilized = nxt_cell.is_stabilized();
-			auto mse_bgr = cv::mean(pow_mat);
-			nxt_cell.set_mse(static_cast<int>(mse_bgr[r] + mse_bgr[g] + mse_bgr[b]));
+			nxt_cell.set_mse(mean(pow_mat));
 
 			// 安定状態に遷移した場合、色を更新
 			if (!before_stabilized && nxt_cell.is_stabilized())
 			{
-				auto mean_bgr = cv::mean(org_roi);
-				const auto r_val = static_cast<int>(mean_bgr[r]);
-				const auto g_val = static_cast<int>(mean_bgr[g]);
-				const auto b_val = static_cast<int>(mean_bgr[b]);
-
-				auto set_color = color::none;
-				if (r_val > 150 && g_val < 80 && b_val < 80)
-					set_color = color::r;
-				else if (r_val < 110 && g_val > 180 && b_val < 100)
-					set_color = color::g;
-				else if (r_val < 90 && g_val < 130 && b_val > 170)
-					set_color = color::b;
-				else if (r_val > 210 && g_val > 180 && b_val < 150)
-					set_color = color::y;
-				else if (r_val > 130 && g_val < 100 && b_val > 170)
-					set_color = color::p;
-				else if (r_val > 180 && g_val > 180 && b_val > 180)
-					set_color = color::jam;
-				nxt_cell.set_recognize_color(set_color);
-
-				const auto logger = spdlog::get(logger_main);
-				SPDLOG_LOGGER_TRACE(logger, "r:{} g:{} b{}", 
-					static_cast<int>(r_val),
-					static_cast<int>(g_val),
-					static_cast<int>(b_val)
-				);
+				nxt_cell.set_recognize_color(mean(org_roi));
 			}
 		}
 	}

@@ -18,14 +18,6 @@ public:
 	static constexpr int nxt_max = 2;
 	static constexpr int nxt_child_max = 2;
 
-	static constexpr int b = 0;
-	static constexpr int g = 1;
-	static constexpr int r = 2;
-
-	static constexpr int h = 0;
-	static constexpr int s = 1;
-	static constexpr int v = 2;
-
 private:
 	int player_idx_;
 
@@ -52,7 +44,7 @@ public:
 	[[nodiscard]] bool wait_character_selection(const cv::Mat& org_mat) const;
 	[[nodiscard]] bool wait_game_start(const cv::Mat& org_mat) const;
 	[[nodiscard]] bool game(int cur_no, const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
-	[[nodiscard]] bool wait_nxt_stable(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
+	[[nodiscard]] bool wait_nxt_stabilize(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
 	void debug_render(const cv::Mat& debug_mat) const;
 
 };
