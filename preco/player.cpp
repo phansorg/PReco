@@ -1,6 +1,8 @@
 #include "player.h"
 
 #include <opencv2/imgproc.hpp>
+#include <iostream>
+#include <fstream>
 
 #include "settings.h"
 #include "logger.h"
@@ -9,10 +11,12 @@ player::player(const int player_idx)
 {
 	player_idx_ = player_idx;
 	player_mode_ = player_mode::wait_game_start;
-	cur_next_idx_ = 0;
+	cur_nxt_idx_ = -2;
+
+	auto& json = settings::get_instance()->json;
+	history_dir_ = json["player_history_dir"].get<std::string>();
 
 	// field
-	auto& json = settings::get_instance()->json;
 	field_frame_rect_ = cv::Rect(
 		json["player_field_x"][player_idx_].get<int>(),
 		json["player_field_y"].get<int>(),
@@ -192,6 +196,7 @@ bool player::wait_game_reset(const cv::Mat& org_mat)
 		}
 	}
 	nxt_records_.clear();
+	cur_nxt_idx_ = -2;
 
 	// comboをリセット
 	combo_cell_.reset();
@@ -204,11 +209,11 @@ bool player::wait_game_reset(const cv::Mat& org_mat)
 
 bool player::wait_game_init(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)
 {
+	const auto logger = spdlog::get(logger_main);
 
 	// 初期化済みの場合、OK
 	if (!nxt_records_.empty())
 	{
-		const auto logger = spdlog::get(logger_main);
 		SPDLOG_LOGGER_TRACE(logger, "wait_game_init ok p:{}", player_idx_);
 		return true;
 	}
@@ -233,10 +238,29 @@ bool player::wait_game_init(const cv::Mat& org_mat, const std::list<cv::Mat>& ma
 			nxt_cell.reset();
 		}
 	}
-	cur_next_idx_ = 0;
+
+	// historyのファイル名を設定
+	const std::time_t raw_time = time(nullptr);
+	std::tm time_info{};
+	char buffer[80];
+
+	if (localtime_s(&time_info ,&raw_time))
+	{
+		logger->critical("localtime_s fail");
+	}
+	if (!std::strftime(buffer, 80, "%Y%m%d_%H%M%S", &time_info))
+	{
+		logger->critical("str format time fail");
+	}
+
+	std::ostringstream file_name;
+	file_name << buffer << "_" << player_idx_ << ".txt";
+
+	// ディレクトリパスと出力ファイル名を結合
+	history_path_ = history_dir_;
+	history_path_.append(file_name.str());
 
 	// player_modeをゲーム開始後にセット
-	const auto logger = spdlog::get(logger_main);
 	player_mode_ = player_mode::wait_nxt_stabilize;
 	logger->info("p:{} player_mode:{}", player_idx_, static_cast<int>(player_mode_));
 
@@ -272,6 +296,10 @@ void player::wait_nxt_stabilize()
 		}
 	}
 
+	nxt_records_.push_back(nxt_cells_[1][axis].get_recognize_color());
+	nxt_records_.push_back(nxt_cells_[1][child].get_recognize_color());
+	cur_nxt_idx_ += 2;
+
 	const auto logger = spdlog::get(logger_main);
 	player_mode_ = player_mode::wait_nxt_change;
 	logger->info("p:{} player_mode:{}", player_idx_, static_cast<int>(player_mode_));
@@ -286,6 +314,8 @@ void player::wait_nxt_change()
 			if (nxt_cell.is_stabilized()) return;
 		}
 	}
+
+	write_history();
 
 	const auto logger = spdlog::get(logger_main);
 	player_mode_ = player_mode::wait_nxt_stabilize;
@@ -363,6 +393,43 @@ void player::game_end()
 	player_mode_ = player_mode::wait_game_start;
 	logger->info("p:{} player_mode:{}", player_idx_, static_cast<int>(player_mode_));
 }
+
+void player::write_history() const
+{
+	std::ofstream history_file(history_path_, std::ios::app);
+	if (!history_file)
+	{
+		return;
+	}
+	history_file
+		<< to_color_text(nxt_records_[cur_nxt_idx_])
+		<< to_color_text(nxt_records_[cur_nxt_idx_ + 1])
+		<< ","
+		<< to_color_text(nxt_records_[cur_nxt_idx_ + 2])
+		<< to_color_text(nxt_records_[cur_nxt_idx_ + 3])
+		<< ","
+		<< to_color_text(nxt_records_[cur_nxt_idx_ + 4])
+		<< to_color_text(nxt_records_[cur_nxt_idx_ + 5])
+		<< ","
+		<< std::endl;
+	history_file.close();
+}
+
+unsigned char player::to_color_text(const color from_color)
+{
+	switch (from_color)
+	{
+	case color::r: return 'R';
+	case color::g: return 'G';
+	case color::b: return 'B';
+	case color::y: return 'Y';
+	case color::p: return 'P';
+	case color::jam: return 'J';
+	case color::none: return '_';
+	}
+	return '*';
+}
+
 
 // ============================================================
 // debug

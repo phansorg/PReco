@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <list>
 #include <opencv2/core/types.hpp>
 
@@ -27,7 +28,10 @@ public:
 private:
 	int player_idx_;
 	player_mode player_mode_;
-	int cur_next_idx_;
+	int cur_nxt_idx_;
+
+	std::string history_dir_;
+	std::filesystem::path history_path_;
 
 	cv::Rect field_frame_rect_;
 	int cell_width_;
@@ -49,6 +53,9 @@ private:
 
 	void init_wait_character_selection_rect();
 	void init_wait_reset_rect();
+
+	void write_history() const;
+	static unsigned char to_color_text(color from_color);
 
 public:
 	explicit player(int player_idx);

@@ -33,10 +33,9 @@ void settings::init()
     json["capture_start_no"] = 4210;
     json["capture_last_no"] = 11085;
 
-	json["history_dir"] = "D:/puyo/movie/history";
-
     json["log_path"] = "D:/puyo/movie/logs/log.txt";
 
+    json["player_history_dir"] = "D:/puyo/movie/history";
     json["player_field_x"] = { 186, 837 };
     json["player_field_y"] = 106;
     json["player_field_w"] = 258;
