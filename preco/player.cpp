@@ -177,43 +177,63 @@ bool player::wait_game_start(const cv::Mat& org_mat) const
 
 bool player::game(int cur_no, const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)
 {
-	return wait_nxt_stabilize(org_mat, mat_histories);
+	update_cells(org_mat, mat_histories);
+	return false;
 }
 
-bool player::wait_nxt_stabilize(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)
+void player::update_cells(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)
 {
+	// field
+	for (auto& field_row : field_cells_)
+	{
+		for (auto& field_cell : field_row)
+		{
+			update_cell(org_mat, mat_histories, field_cell);
+		}
+	}
+
+	// nxt
 	for (auto& nxt_child_cells : nxt_cells_)
 	{
 		for (auto& nxt_cell : nxt_child_cells)
 		{
-			// 対象領域を取得し、HSVに変換
-			const auto& org_roi = org_mat(nxt_cell.recognize_rect);
-			cv::Mat org_hsv_mat;
-			cvtColor(org_roi, org_hsv_mat, cv::COLOR_BGR2HSV);
-
-			const auto history_roi = mat_histories.front()(nxt_cell.recognize_rect);
-			cv::Mat history_hsv_mat;
-			cvtColor(history_roi, history_hsv_mat, cv::COLOR_BGR2HSV);
-
-			// 対象領域のピクセル毎にMSEを計算
-			cv::Mat diff_mat;
-			subtract(org_hsv_mat, history_hsv_mat, diff_mat);
-			cv::Mat pow_mat;
-			pow(diff_mat, 2, pow_mat);
-
-			// MSEの平均をとり、cellに設定
-			const auto before_stabilized = nxt_cell.is_stabilized();
-			nxt_cell.set_mse(mean(pow_mat));
-
-			// 安定状態に遷移した場合、色を更新
-			if (!before_stabilized && nxt_cell.is_stabilized())
-			{
-				nxt_cell.set_recognize_color(mean(org_roi));
-			}
+			update_cell(org_mat, mat_histories, nxt_cell);
 		}
 	}
 
-	return false;
+	// combo
+	update_cell(org_mat, mat_histories, combo_cell_);
+
+	// end
+	update_cell(org_mat, mat_histories, end_cell_);
+}
+
+void player::update_cell(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories, cell& target_cell) const
+{
+	// 対象領域を取得し、HSVに変換
+	const auto& org_roi = org_mat(target_cell.recognize_rect);
+	cv::Mat org_hsv_mat;
+	cvtColor(org_roi, org_hsv_mat, cv::COLOR_BGR2HSV);
+
+	const auto history_roi = mat_histories.front()(target_cell.recognize_rect);
+	cv::Mat history_hsv_mat;
+	cvtColor(history_roi, history_hsv_mat, cv::COLOR_BGR2HSV);
+
+	// 対象領域のピクセル毎にMSEを計算
+	cv::Mat diff_mat;
+	subtract(org_hsv_mat, history_hsv_mat, diff_mat);
+	cv::Mat pow_mat;
+	pow(diff_mat, 2, pow_mat);
+
+	// MSEの平均をとり、cellに設定
+	const auto before_stabilized = target_cell.is_stabilized();
+	target_cell.set_mse(mean(pow_mat));
+
+	// 安定状態に遷移した場合、色を更新
+	if (!before_stabilized && target_cell.is_stabilized())
+	{
+		target_cell.set_recognize_color(mean(org_roi));
+	}
 }
 
 // ============================================================

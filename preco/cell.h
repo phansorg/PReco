@@ -44,7 +44,7 @@ public:
 	void render_rect(const cv::Mat& debug_mat, cv::Rect rect, const cv::Scalar& bgr_scalar) const;
 
 private:
-	const int mse_threshold_ = 180;
+	const int mse_threshold_ = 170;
 
 	color recognize_color_;
 	ring_buffer mse_ring_buffer_;

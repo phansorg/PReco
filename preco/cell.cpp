@@ -38,17 +38,17 @@ void cell::set_recognize_color(const cv::Scalar& bgr_scalar)
 	const auto b_val = static_cast<int>(bgr_scalar[b]);
 
 	auto recognize_color = color::none;
-	if (r_val > 150 && g_val < 70 && b_val < 80)
+	if (r_val > 150 && g_val < 120 && b_val < 120)
 		recognize_color = color::r;
-	else if (r_val < 120 && g_val > 190 && b_val < 100)
+	else if (r_val < 130 && g_val > 173 && b_val < 120)
 		recognize_color = color::g;
-	else if (r_val < 95 && g_val < 135 && b_val > 170)
+	else if (r_val < 120 && g_val < 160 && b_val > 170)
 		recognize_color = color::b;
-	else if (r_val > 210 && g_val > 180 && b_val < 160)
+	else if (r_val > 210 && g_val > 173 && b_val < 173)
 		recognize_color = color::y;
-	else if (r_val > 130 && g_val < 90 && b_val > 170)
+	else if (r_val > 130 && g_val < 120 && b_val > 170)
 		recognize_color = color::p;
-	else if (r_val > 150 && g_val > 150 && b_val > 150)
+	else if (r_val > 168 && g_val > 173 && b_val > 173)
 		recognize_color = color::jam;
 	recognize_color_ = recognize_color;
 
@@ -106,13 +106,13 @@ void cell::debug_render(const cv::Mat& debug_mat) const
 		bgr_scalar = cv::Scalar(0, 255, 0);
 		break;
 	case color::b:
-		bgr_scalar = cv::Scalar(255, 0, 0);
+		bgr_scalar = cv::Scalar(255, 128, 0);
 		break;
 	case color::y:
 		bgr_scalar = cv::Scalar(0, 255, 255);
 		break;
 	case color::p:
-		bgr_scalar = cv::Scalar(255, 0, 255);
+		bgr_scalar = cv::Scalar(255, 0, 192);
 		break;
 	case color::jam:
 		bgr_scalar = cv::Scalar(255, 255, 255);
@@ -135,5 +135,5 @@ void cell::render_rect(const cv::Mat& debug_mat, const cv::Rect rect, const cv::
 	const auto y1 = rect.y;
 	const auto x2 = rect.x + rect.width - 1;
 	const auto y2 = rect.y + rect.height - 1;
-	rectangle(debug_mat, cv::Point(x1, y1), cv::Point(x2, y2), bgr_scalar, 1);
+	rectangle(debug_mat, cv::Point(x1, y1), cv::Point(x2, y2), bgr_scalar, 2);
 }
