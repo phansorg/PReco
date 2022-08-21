@@ -418,6 +418,10 @@ void player::write_history() const
 	{
 		return;
 	}
+
+	unsigned char field_text[rows * cols + 1] = {0};
+	to_field_text(field_text);
+
 	history_file
 		<< to_color_text(nxt_records_[cur_nxt_idx_])
 		<< to_color_text(nxt_records_[cur_nxt_idx_ + 1])
@@ -428,6 +432,7 @@ void player::write_history() const
 		<< to_color_text(nxt_records_[cur_nxt_idx_ + 4])
 		<< to_color_text(nxt_records_[cur_nxt_idx_ + 5])
 		<< ","
+	    << field_text
 		<< std::endl;
 	history_file.close();
 }
@@ -446,7 +451,16 @@ unsigned char player::to_color_text(const color from_color)
 	}
 	return '*';
 }
-
+void player::to_field_text(unsigned char* buffer) const
+{
+	for (auto row = 0; row < rows; row++)
+	{
+		for (auto col = 0; col < cols; col++)
+		{
+			buffer[row * cols + col] = to_color_text(field_cells_[row][col].get_recognize_color());
+		}
+	}
+}
 
 // ============================================================
 // debug

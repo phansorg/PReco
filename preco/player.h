@@ -56,6 +56,7 @@ private:
 
 	void write_history() const;
 	static unsigned char to_color_text(color from_color);
+	void to_field_text(unsigned char* buffer) const;
 
 public:
 	explicit player(int player_idx);
