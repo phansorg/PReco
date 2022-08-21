@@ -46,8 +46,10 @@ public:
 
 	[[nodiscard]] bool wait_character_selection(const cv::Mat& org_mat) const;
 	[[nodiscard]] bool wait_game_reset(const cv::Mat& org_mat);
+	[[nodiscard]] bool wait_game_init(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
 	[[nodiscard]] bool game(int cur_no, const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
-	void update_cells(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
+	void update_all_cells(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
+	void update_nxt_cells(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
 	void update_cell(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories, cell& target_cell) const;
 	void debug_render(const cv::Mat& debug_mat) const;
 

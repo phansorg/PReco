@@ -70,6 +70,9 @@ void game_thread::process()
 		case game_mode::wait_game_reset:
 			wait_game_reset(org_mat);
 			break;
+		case game_mode::wait_game_init:
+			wait_game_init(org_mat);
+			break;
 		case game_mode::wait_game_end:
 			wait_game_end(org_mat);
 			debug_render(org_mat);
@@ -127,6 +130,19 @@ void game_thread::wait_game_reset(const cv::Mat& org_mat)
 	for (const auto& player : players_)
 	{
 		if (!player->wait_game_reset(org_mat)) return;
+	}
+
+	mode_ = game_mode::wait_game_init;
+	logger->info("No:{} game_mode:{}", cur_no_, static_cast<int>(mode_));
+}
+
+void game_thread::wait_game_init(const cv::Mat& org_mat)
+{
+	const auto logger = spdlog::get(logger_main);
+
+	for (const auto& player : players_)
+	{
+		if (!player->wait_game_init(org_mat, mat_histories_)) return;
 	}
 
 	mode_ = game_mode::wait_game_end;

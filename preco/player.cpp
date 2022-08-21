@@ -193,13 +193,29 @@ bool player::wait_game_reset(const cv::Mat& org_mat)
 	return true;
 }
 
+bool player::wait_game_init(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)
+{
+	// nxtが全て安定し、色があればOK
+	update_nxt_cells(org_mat, mat_histories);
+	for (auto& nxt_child_cells : nxt_cells_)
+	{
+		for (auto& nxt_cell : nxt_child_cells)
+		{
+			if (!nxt_cell.is_stabilized()) return false;
+			if (nxt_cell.get_recognize_color() == color::none) return false;
+		}
+	}
+
+	return true;
+}
+
 bool player::game(int cur_no, const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)
 {
-	update_cells(org_mat, mat_histories);
+	update_all_cells(org_mat, mat_histories);
 	return false;
 }
 
-void player::update_cells(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)
+void player::update_all_cells(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)
 {
 	// field
 	for (auto& field_row : field_cells_)
@@ -211,6 +227,17 @@ void player::update_cells(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_
 	}
 
 	// nxt
+	update_nxt_cells(org_mat, mat_histories);
+
+	// combo
+	update_cell(org_mat, mat_histories, combo_cell_);
+
+	// end
+	update_cell(org_mat, mat_histories, end_cell_);
+}
+
+void player::update_nxt_cells(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)
+{
 	for (auto& nxt_child_cells : nxt_cells_)
 	{
 		for (auto& nxt_cell : nxt_child_cells)
@@ -218,12 +245,6 @@ void player::update_cells(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_
 			update_cell(org_mat, mat_histories, nxt_cell);
 		}
 	}
-
-	// combo
-	update_cell(org_mat, mat_histories, combo_cell_);
-
-	// end
-	update_cell(org_mat, mat_histories, end_cell_);
 }
 
 void player::update_cell(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories, cell& target_cell) const
@@ -250,7 +271,7 @@ void player::update_cell(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_h
 	// 安定状態に遷移した場合、色を更新
 	if (!before_stabilized && target_cell.is_stabilized())
 	{
-		target_cell.set_recognize_color(mean(org_roi));
+		target_cell.update_recognize_color(mean(org_roi));
 	}
 }
 

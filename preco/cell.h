@@ -36,7 +36,8 @@ public:
 
 	void reset();
 
-	void set_recognize_color(const cv::Scalar& bgr_scalar);
+	void update_recognize_color(const cv::Scalar& bgr_scalar);
+	color get_recognize_color() const;
 
 	void set_mse(const cv::Scalar& hsv_scalar);
 	[[nodiscard]] int get_mse() const;

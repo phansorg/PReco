@@ -37,7 +37,7 @@ void cell::reset()
 	stabilize_count_ = 0;
 }
 
-void cell::set_recognize_color(const cv::Scalar& bgr_scalar)
+void cell::update_recognize_color(const cv::Scalar& bgr_scalar)
 {
 	const auto r_val = static_cast<int>(bgr_scalar[r]);
 	const auto g_val = static_cast<int>(bgr_scalar[g]);
@@ -64,6 +64,11 @@ void cell::set_recognize_color(const cv::Scalar& bgr_scalar)
 		static_cast<int>(g_val),
 		static_cast<int>(b_val)
 	);
+}
+
+color cell::get_recognize_color() const
+{
+	return recognize_color_;
 }
 
 void cell::set_mse(const cv::Scalar& hsv_scalar)
