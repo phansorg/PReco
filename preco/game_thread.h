@@ -25,7 +25,7 @@ class game_thread
 
 	bool debug_write_;
 	std::string debug_path_;
-	game_mode mode_;
+	game_mode game_mode_;
 	bool first_game_;
 	int game_start_no_;
 

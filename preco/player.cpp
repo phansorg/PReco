@@ -8,7 +8,8 @@
 player::player(const int player_idx)
 {
 	player_idx_ = player_idx;
-	move_next_idx_ = 0;
+	player_mode_ = player_mode::wait_game_start;
+	cur_next_idx_ = 0;
 
 	// field
 	auto& json = settings::get_instance()->json;
@@ -232,7 +233,12 @@ bool player::wait_game_init(const cv::Mat& org_mat, const std::list<cv::Mat>& ma
 			nxt_cell.reset();
 		}
 	}
-	move_next_idx_ = 0;
+	cur_next_idx_ = 0;
+
+	// player_modeをゲーム開始後にセット
+	const auto logger = spdlog::get(logger_main);
+	player_mode_ = player_mode::wait_nxt_stabilize;
+	logger->info("p:{} player_mode:{}", player_idx_, static_cast<int>(player_mode_));
 
 	return true;
 }
@@ -240,7 +246,50 @@ bool player::wait_game_init(const cv::Mat& org_mat, const std::list<cv::Mat>& ma
 bool player::game(int cur_no, const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)
 {
 	update_all_cells(org_mat, mat_histories);
+
+	switch (player_mode_)
+	{
+	case player_mode::wait_game_start:
+		break;
+	case player_mode::wait_nxt_stabilize:
+		wait_nxt_stabilize();
+		break;
+	case player_mode::wait_nxt_change:
+		wait_nxt_change();
+		break;
+	}
+
 	return wait_game_end();
+}
+
+void player::wait_nxt_stabilize()
+{
+	for (auto& nxt_child_cells : nxt_cells_)
+	{
+		for (auto& nxt_cell : nxt_child_cells)
+		{
+			if (!nxt_cell.is_stabilized()) return;
+		}
+	}
+
+	const auto logger = spdlog::get(logger_main);
+	player_mode_ = player_mode::wait_nxt_change;
+	logger->info("p:{} player_mode:{}", player_idx_, static_cast<int>(player_mode_));
+}
+
+void player::wait_nxt_change()
+{
+	for (auto& nxt_child_cells : nxt_cells_)
+	{
+		for (auto& nxt_cell : nxt_child_cells)
+		{
+			if (nxt_cell.is_stabilized()) return;
+		}
+	}
+
+	const auto logger = spdlog::get(logger_main);
+	player_mode_ = player_mode::wait_nxt_stabilize;
+	logger->info("p:{} player_mode:{}", player_idx_, static_cast<int>(player_mode_));
 }
 
 bool player::wait_game_end() const
@@ -306,6 +355,13 @@ void player::update_cell(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_h
 	{
 		target_cell.update_recognize_color(mean(org_roi));
 	}
+}
+
+void player::game_end()
+{
+	const auto logger = spdlog::get(logger_main);
+	player_mode_ = player_mode::wait_game_start;
+	logger->info("p:{} player_mode:{}", player_idx_, static_cast<int>(player_mode_));
 }
 
 // ============================================================

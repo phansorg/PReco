@@ -12,8 +12,8 @@ game_thread::game_thread()
 	cur_no_ = json["capture_start_no"].get<int>();
 	debug_write_ = json["game_debug_write"].get<bool>();
 	debug_path_ = json["game_debug_path"].get<std::string>();
-	mode_ = static_cast<game_mode>(json["game_start_mode"].get<int>());
-	if (mode_ == game_mode::wait_character_selection)
+	game_mode_ = static_cast<game_mode>(json["game_start_mode"].get<int>());
+	if (game_mode_ == game_mode::wait_character_selection)
 	{
 		first_game_ = true;
 	}
@@ -71,7 +71,7 @@ void game_thread::process()
 	{
 		cv::Mat org_mat = pop();
 
-		switch (mode_)
+		switch (game_mode_)
 		{
 		case game_mode::wait_character_selection:
 			wait_character_selection(org_mat);
@@ -132,8 +132,8 @@ void game_thread::wait_character_selection(const cv::Mat& org_mat)
 	}
 
 	const auto logger = spdlog::get(logger_main);
-	mode_ = game_mode::wait_game_reset;
-	logger->info("No:{} game_mode:{}", cur_no_, static_cast<int>(mode_));
+	game_mode_ = game_mode::wait_game_reset;
+	logger->info("No:{} game_mode:{}", cur_no_, static_cast<int>(game_mode_));
 }
 
 void game_thread::wait_game_reset(const cv::Mat& org_mat)
@@ -144,8 +144,8 @@ void game_thread::wait_game_reset(const cv::Mat& org_mat)
 	}
 
 	const auto logger = spdlog::get(logger_main);
-	mode_ = game_mode::wait_game_init;
-	logger->info("No:{} game_mode:{}", cur_no_, static_cast<int>(mode_));
+	game_mode_ = game_mode::wait_game_init;
+	logger->info("No:{} game_mode:{}", cur_no_, static_cast<int>(game_mode_));
 }
 
 void game_thread::wait_game_init(const cv::Mat& org_mat)
@@ -164,9 +164,9 @@ void game_thread::wait_game_init(const cv::Mat& org_mat)
 	{
 		game_start_no_ = cur_no_ + wait_game_start_span_;
 	}
-	mode_ = game_mode::wait_game_start;
+	game_mode_ = game_mode::wait_game_start;
 	const auto logger = spdlog::get(logger_main);
-	logger->info("No:{} game_mode:{}", cur_no_, static_cast<int>(mode_));
+	logger->info("No:{} game_mode:{}", cur_no_, static_cast<int>(game_mode_));
 }
 
 void game_thread::wait_game_start()
@@ -174,10 +174,9 @@ void game_thread::wait_game_start()
 	if (game_start_no_ != cur_no_) return;
 
 	const auto logger = spdlog::get(logger_main);
-	mode_ = game_mode::wait_game_end;
-	logger->info("No:{} game_mode:{}", cur_no_, static_cast<int>(mode_));
+	game_mode_ = game_mode::wait_game_end;
+	logger->info("No:{} game_mode:{}", cur_no_, static_cast<int>(game_mode_));
 }
-
 
 void game_thread::wait_game_end(const cv::Mat& org_mat)
 {
@@ -191,8 +190,13 @@ void game_thread::wait_game_end(const cv::Mat& org_mat)
 	}
 	if (!game_end) return;
 
-	mode_ = game_mode::wait_game_reset;
-	logger->info("No:{} game_mode:{}", cur_no_, static_cast<int>(mode_));
+	for (const auto& player : players_)
+	{
+		player->game_end();
+	}
+
+	game_mode_ = game_mode::wait_game_reset;
+	logger->info("No:{} game_mode:{}", cur_no_, static_cast<int>(game_mode_));
 }
 
 

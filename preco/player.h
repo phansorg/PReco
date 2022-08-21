@@ -5,6 +5,12 @@
 
 #include "cell.h"
 
+enum class player_mode {
+	wait_game_start,
+	wait_nxt_stabilize,
+	wait_nxt_change,
+};
+
 class player
 {
 public:
@@ -20,7 +26,8 @@ public:
 
 private:
 	int player_idx_;
-	int move_next_idx_;
+	player_mode player_mode_;
+	int cur_next_idx_;
 
 	cv::Rect field_frame_rect_;
 	int cell_width_;
@@ -50,10 +57,16 @@ public:
 	[[nodiscard]] bool wait_game_reset(const cv::Mat& org_mat);
 	[[nodiscard]] bool wait_game_init(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
 	[[nodiscard]] bool game(int cur_no, const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
+	void wait_nxt_stabilize();
+	void wait_nxt_change();
 	[[nodiscard]] bool wait_game_end() const;
 	void update_all_cells(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
 	void update_nxt_cells(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
 	void update_cell(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories, cell& target_cell) const;
+
+	void game_end();
+
 	void debug_render(const cv::Mat& debug_mat) const;
+
 
 };
