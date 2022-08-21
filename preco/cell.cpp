@@ -59,10 +59,11 @@ void cell::update_recognize_color(const cv::Scalar& bgr_scalar)
 	recognize_color_ = recognize_color;
 
 	const auto logger = spdlog::get(logger_main);
-	SPDLOG_LOGGER_TRACE(logger, "r:{} g:{} b:{}",
+	SPDLOG_LOGGER_TRACE(logger, "r:{} g:{} b:{} color:{}",
 		static_cast<int>(r_val),
 		static_cast<int>(g_val),
-		static_cast<int>(b_val)
+		static_cast<int>(b_val),
+		static_cast<int>(recognize_color_)
 	);
 }
 
@@ -98,7 +99,7 @@ bool cell::is_stabilizing() const
 
 bool cell::is_stabilized() const
 {
-	return stabilize_count_ >= 3;
+	return stabilize_count_ >= 2;
 }
 
 void cell::debug_render(const cv::Mat& debug_mat) const

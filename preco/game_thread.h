@@ -9,6 +9,7 @@ enum class game_mode {
 	wait_character_selection,
 	wait_game_reset,
 	wait_game_init,
+	wait_game_start,
 	wait_game_end,
 };
 
@@ -16,12 +17,17 @@ class game_thread
 {
 	const unsigned long long capture_mat_queue_max_ = 10;
 
+	const int wait_game_start_span_ = 67;
+	const int wait_first_game_start_span_ = 94;
+
 	bool thread_loop_;
 	int cur_no_;
 
 	bool debug_write_;
 	std::string debug_path_;
 	game_mode mode_;
+	bool first_game_;
+	int game_start_no_;
 
 	bool capture_end_;
 
@@ -49,6 +55,7 @@ private:
 	void wait_character_selection(const cv::Mat& org_mat);
 	void wait_game_reset(const cv::Mat& org_mat);
 	void wait_game_init(const cv::Mat& org_mat);
+	void wait_game_start();
 	void wait_game_end(const cv::Mat& org_mat);
 
 	void debug_render(const cv::Mat& org_mat) const;

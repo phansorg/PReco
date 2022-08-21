@@ -31,7 +31,7 @@ void settings::init()
 	json["capture_mode"] = capture_mode::jpeg;
     json["capture_path"] = "D:/puyo/movie/image_target";
     json["capture_start_no"] = 4210;
-    json["capture_last_no"] = 4400;
+    json["capture_last_no"] = 11085;
 
 	json["history_dir"] = "D:/puyo/movie/history";
 

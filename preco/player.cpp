@@ -190,12 +190,28 @@ bool player::wait_game_reset(const cv::Mat& org_mat)
 			nxt_cell.reset();
 		}
 	}
+	nxt_records_.clear();
+
+	// comboをリセット
+	combo_cell_.reset();
+
+	// endをリセット
+	end_cell_.reset();
 
 	return true;
 }
 
 bool player::wait_game_init(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)
 {
+
+	// 初期化済みの場合、OK
+	if (!nxt_records_.empty())
+	{
+		const auto logger = spdlog::get(logger_main);
+		SPDLOG_LOGGER_TRACE(logger, "wait_game_init ok p:{}", player_idx_);
+		return true;
+	}
+
 	// nxtが全て安定し、色があればOK
 	update_nxt_cells(org_mat, mat_histories);
 	for (auto& nxt_child_cells : nxt_cells_)
@@ -207,12 +223,13 @@ bool player::wait_game_init(const cv::Mat& org_mat, const std::list<cv::Mat>& ma
 		}
 	}
 
-	// 初期化完了時のnxtを登録
+	// 初期化完了時のnxtを登録し、再度リセット(game_startで再度認識させるため)
 	for (auto& nxt_child_cells : nxt_cells_)
 	{
 		for (auto& nxt_cell : nxt_child_cells)
 		{
 			nxt_records_.push_back(nxt_cell.get_recognize_color());
+			nxt_cell.reset();
 		}
 	}
 	move_next_idx_ = 0;
@@ -223,7 +240,12 @@ bool player::wait_game_init(const cv::Mat& org_mat, const std::list<cv::Mat>& ma
 bool player::game(int cur_no, const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)
 {
 	update_all_cells(org_mat, mat_histories);
-	return false;
+	return wait_game_end();
+}
+
+bool player::wait_game_end() const
+{
+	return end_cell_.get_recognize_color() == color::g;
 }
 
 void player::update_all_cells(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)
@@ -318,7 +340,8 @@ void player::debug_render(const cv::Mat& debug_mat) const
 	end_cell_.debug_render(debug_mat);
 
 	// nxtのmse
-	SPDLOG_LOGGER_TRACE(logger, "game mse1:{} mse2:{} mse3:{} mse4:{}",
+	SPDLOG_LOGGER_TRACE(logger, "game p:{} mse1:{} mse2:{} mse3:{} mse4:{}",
+		player_idx_,
 		nxt_cells_[0][axis].get_mse(),
 		nxt_cells_[0][child].get_mse(),
 		nxt_cells_[1][axis].get_mse(),
