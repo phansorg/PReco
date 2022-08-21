@@ -206,6 +206,16 @@ bool player::wait_game_init(const cv::Mat& org_mat, const std::list<cv::Mat>& ma
 		}
 	}
 
+	// ‰Šú‰»Š®—¹‚Ìnxt‚ğ“o˜^
+	for (auto& nxt_child_cells : nxt_cells_)
+	{
+		for (auto& nxt_cell : nxt_child_cells)
+		{
+			nxt_records_.push_back(nxt_cell.get_recognize_color());
+		}
+	}
+	move_next_idx_ = 0;
+
 	return true;
 }
 

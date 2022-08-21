@@ -27,6 +27,8 @@ private:
 	cell field_cells_[rows][cols];
 
 	cell nxt_cells_[nxt_max][nxt_child_max];
+	std::vector<color> nxt_records_;
+	int move_next_idx_;
 
 	cell end_cell_;
 	cell combo_cell_;
