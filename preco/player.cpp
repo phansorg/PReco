@@ -325,6 +325,8 @@ void player::wait_nxt_stabilize()
 
 void player::wait_nxt_change()
 {
+	const auto logger = spdlog::get(logger_main);
+
 	for (auto& nxt_child_cells : nxt_cells_)
 	{
 		for (auto& nxt_cell : nxt_child_cells)
@@ -333,9 +335,28 @@ void player::wait_nxt_change()
 		}
 	}
 
+	// nxt‚ª•Ï‚í‚Á‚½ = Ý’u‚µ‚½‚Ì‚Åfield‚ðÄŠm”F
+	for (auto& field_row : field_cells_)
+	{
+		for (auto& field_cell : field_row)
+		{
+			const auto recognize_color = field_cell.get_recognize_color();
+			if (const auto game_color = field_cell.game_color; game_color != recognize_color)
+			{
+				logger->info("wait_nxt_change p:{} row:{} col:{} color:{}>{}",
+					player_idx_,
+					field_cell.row,
+					field_cell.col,
+					static_cast<int>(game_color),
+					static_cast<int>(recognize_color));
+
+				field_cell.game_color = recognize_color;
+			}
+		}
+	}
+	
 	write_history();
 
-	const auto logger = spdlog::get(logger_main);
 	player_mode_ = player_mode::wait_nxt_stabilize;
 	logger->info("p:{} player_mode:{}", player_idx_, static_cast<int>(player_mode_));
 }
