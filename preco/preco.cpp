@@ -1,5 +1,4 @@
-﻿#include <fstream>
-#include <filesystem>
+﻿#include <filesystem>
 #include <thread>
 
 #include "settings.h"
