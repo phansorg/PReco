@@ -88,8 +88,9 @@ void player::init_field_cells()
 	const auto height = field_frame_rect_.height;
 	for (int row = 0; row < rows; row++)
 	{
-		const auto y1 = height * row / rows + field_frame_rect_.y;
-		const auto y2 = height * (row + 1) / rows + field_frame_rect_.y;
+		const auto y_idx = rows - row - 1;
+		const auto y1 = height * y_idx / rows + field_frame_rect_.y;
+		const auto y2 = height * (y_idx + 1) / rows + field_frame_rect_.y;
 		for (int col = 0; col < cols; col++)
 		{
 			const auto x1 = width * col / cols + field_frame_rect_.x;
