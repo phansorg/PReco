@@ -42,6 +42,9 @@ void cell::reset()
 
 void cell::update_recognize_color(const cv::Scalar& bgr_scalar)
 {
+	if (row >= 12) return;
+	if (row == 11 && col == 2) return;
+
 	const auto r_val = static_cast<int>(bgr_scalar[r]);
 	const auto g_val = static_cast<int>(bgr_scalar[g]);
 	const auto b_val = static_cast<int>(bgr_scalar[b]);
