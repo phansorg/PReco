@@ -70,6 +70,7 @@ public:
 private:
 	void wait_nxt_stabilize();
 	void wait_nxt_change();
+	void put_nxt();
 
 	void update_all_cells(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
 	void update_nxt_cells(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
