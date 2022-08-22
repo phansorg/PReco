@@ -24,7 +24,7 @@ player::player(const int player_idx)
 		json["player_field_h"].get<int>()
 	);
 	cell_width_ = field_frame_rect_.width / cols;
-	cell_height_ = field_frame_rect_.height / rows;
+	cell_height_ = field_frame_rect_.height / rows0;
 
 	// nxt1
 	auto row = 0;
@@ -86,11 +86,11 @@ void player::init_field_cells()
 {
 	const auto width = field_frame_rect_.width;
 	const auto height = field_frame_rect_.height;
-	for (int row = 0; row < rows; row++)
+	for (int row = 0; row < rows2; row++)
 	{
-		const auto y_idx = rows - row - 1;
-		const auto y1 = height * y_idx / rows + field_frame_rect_.y;
-		const auto y2 = height * (y_idx + 1) / rows + field_frame_rect_.y;
+		const auto y_idx = rows2 - row - 3;
+		const auto y1 = height * y_idx / rows0 + field_frame_rect_.y;
+		const auto y2 = height * (y_idx + 1) / rows0 + field_frame_rect_.y;
 		for (int col = 0; col < cols; col++)
 		{
 			const auto x1 = width * col / cols + field_frame_rect_.x;
@@ -420,7 +420,7 @@ void player::write_history() const
 		return;
 	}
 
-	unsigned char field_text[rows * cols + 1] = {0};
+	unsigned char field_text[rows2 * cols + 1] = {0};
 	to_field_text(field_text);
 
 	history_file
@@ -454,7 +454,7 @@ unsigned char player::to_color_text(const color from_color)
 }
 void player::to_field_text(unsigned char* buffer) const
 {
-	for (auto row = 0; row < rows; row++)
+	for (auto row = 0; row < rows2; row++)
 	{
 		for (auto col = 0; col < cols; col++)
 		{
