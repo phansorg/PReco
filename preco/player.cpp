@@ -304,6 +304,18 @@ bool player::game(int cur_no, const cv::Mat& org_mat, const std::list<cv::Mat>& 
 	return wait_game_end();
 }
 
+bool player::wait_game_end() const
+{
+	return end_cell_.get_recognize_color() == color::g;
+}
+
+void player::game_end()
+{
+	const auto logger = spdlog::get(logger_main);
+	player_mode_ = player_mode::wait_game_start;
+	logger->info("p:{} player_mode:{}", player_idx_, static_cast<int>(player_mode_));
+}
+
 void player::wait_nxt_stabilize()
 {
 	for (auto& nxt_child_cells : nxt_cells_)
@@ -359,11 +371,6 @@ void player::wait_nxt_change()
 
 	player_mode_ = player_mode::wait_nxt_stabilize;
 	logger->info("p:{} player_mode:{}", player_idx_, static_cast<int>(player_mode_));
-}
-
-bool player::wait_game_end() const
-{
-	return end_cell_.get_recognize_color() == color::g;
 }
 
 void player::update_all_cells(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)
@@ -424,13 +431,6 @@ void player::update_cell(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_h
 	{
 		target_cell.update_recognize_color(mean(org_roi));
 	}
-}
-
-void player::game_end()
-{
-	const auto logger = spdlog::get(logger_main);
-	player_mode_ = player_mode::wait_game_start;
-	logger->info("p:{} player_mode:{}", player_idx_, static_cast<int>(player_mode_));
 }
 
 void player::write_history() const

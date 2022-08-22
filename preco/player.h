@@ -48,6 +48,10 @@ private:
 	cv::Rect wait_character_selection_rect_;
 	cv::Rect wait_reset_rect_;
 
+public:
+	explicit player(int player_idx);
+
+private:
 	void init_field_cells();
 	void init_combo_cell();
 	void init_end_cell();
@@ -55,27 +59,26 @@ private:
 	void init_wait_character_selection_rect();
 	void init_wait_reset_rect();
 
+public:
+	[[nodiscard]] bool wait_character_selection(const cv::Mat& org_mat) const;
+	[[nodiscard]] bool wait_game_reset(const cv::Mat& org_mat);
+	[[nodiscard]] bool wait_game_init(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
+	[[nodiscard]] bool game(int cur_no, const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
+	[[nodiscard]] bool wait_game_end() const;
+	void game_end();
+
+private:
+	void wait_nxt_stabilize();
+	void wait_nxt_change();
+
+	void update_all_cells(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
+	void update_nxt_cells(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
+	void update_cell(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories, cell& target_cell) const;
+
 	void write_history() const;
 	static unsigned char to_color_text(color from_color);
 	void to_field_text(unsigned char* buffer) const;
 
 public:
-	explicit player(int player_idx);
-
-	[[nodiscard]] bool wait_character_selection(const cv::Mat& org_mat) const;
-	[[nodiscard]] bool wait_game_reset(const cv::Mat& org_mat);
-	[[nodiscard]] bool wait_game_init(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
-	[[nodiscard]] bool game(int cur_no, const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
-	void wait_nxt_stabilize();
-	void wait_nxt_change();
-	[[nodiscard]] bool wait_game_end() const;
-	void update_all_cells(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
-	void update_nxt_cells(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
-	void update_cell(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories, cell& target_cell) const;
-
-	void game_end();
-
 	void debug_render(const cv::Mat& debug_mat) const;
-
-
 };
