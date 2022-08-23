@@ -29,6 +29,7 @@ player::player(const int player_idx)
 	// nxt1
 	auto row = 0;
 	auto col = axis;
+	nxt_cells_[row][col].type = cell_type::block;
 	nxt_cells_[row][col].row = row;
 	nxt_cells_[row][col].col = col;
 	nxt_cells_[row][col].set_rect(cv::Rect(
@@ -41,6 +42,7 @@ player::player(const int player_idx)
 	auto clone_rect = nxt_cells_[row][col].frame_rect;
 	col = child;
 	clone_rect.y += clone_rect.height;
+	nxt_cells_[row][col].type = cell_type::block;
 	nxt_cells_[row][col].row = row;
 	nxt_cells_[row][col].col = col;
 	nxt_cells_[row][col].set_rect(clone_rect);
@@ -48,6 +50,7 @@ player::player(const int player_idx)
 	// nxt2
 	row = 1;
 	col = axis;
+	nxt_cells_[row][col].type = cell_type::block;
 	nxt_cells_[row][col].row = row;
 	nxt_cells_[row][col].col = col;
 	nxt_cells_[row][col].set_rect(cv::Rect(
@@ -59,6 +62,7 @@ player::player(const int player_idx)
 	clone_rect = nxt_cells_[row][col].frame_rect;
 	col = child;
 	clone_rect.y += clone_rect.height;
+	nxt_cells_[row][col].type = cell_type::block;
 	nxt_cells_[row][col].row = 1;
 	nxt_cells_[row][col].col = col;
 	nxt_cells_[row][col].set_rect(clone_rect);
@@ -95,6 +99,7 @@ void player::init_field_cells()
 		{
 			const auto x1 = width * col / cols + field_frame_rect_.x;
 			const auto x2 = width * (col + 1) / cols + field_frame_rect_.x;
+			field_cells_[row][col].type = cell_type::block;
 			field_cells_[row][col].row = row;
 			field_cells_[row][col].col = col;
 			field_cells_[row][col].set_rect(cv::Rect(
@@ -297,16 +302,15 @@ bool player::game(int cur_no, const cv::Mat& org_mat, const std::list<cv::Mat>& 
 		wait_nxt_stabilize();
 		break;
 	case player_mode::wait_nxt_change:
+		if (wait_combo())
+			break;
 		wait_nxt_change();
+		break;
+	case player_mode::wait_game_end:
 		break;
 	}
 
 	return wait_game_end();
-}
-
-bool player::wait_game_end() const
-{
-	return end_cell_.get_recognize_color() == color::g;
 }
 
 void player::game_end()
@@ -333,6 +337,17 @@ void player::wait_nxt_stabilize()
 	const auto logger = spdlog::get(logger_main);
 	player_mode_ = player_mode::wait_nxt_change;
 	logger->info("p:{} player_mode:{}", player_idx_, static_cast<int>(player_mode_));
+}
+
+bool player::wait_combo()
+{
+	// スコアの白色(jam)部分が無くなったら連鎖開始
+	if (combo_cell_.get_recognize_color() == color::jam) return false;
+
+	const auto logger = spdlog::get(logger_main);
+	player_mode_ = player_mode::wait_game_end;
+	logger->info("p:{} player_mode:{}", player_idx_, static_cast<int>(player_mode_));
+	return true;
 }
 
 void player::wait_nxt_change()
@@ -363,20 +378,28 @@ void player::put_nxt()
 	{
 		for (auto& field_cell : field_row)
 		{
+			// 色が変化していない場合、対象外
+			const auto game_color = field_cell.game_color;
 			const auto recognize_color = field_cell.get_recognize_color();
-			if (const auto game_color = field_cell.game_color; game_color != recognize_color)
-			{
-				logger->info("put_nxt p:{} row:{} col:{} color:{}>{}",
-					player_idx_,
-					field_cell.row,
-					field_cell.col,
-					static_cast<int>(game_color),
-					static_cast<int>(recognize_color));
+			if (game_color == recognize_color) continue;
 
-				field_cell.game_color = recognize_color;
-			}
+			// 設置した
+			logger->info("put_nxt p:{} row:{} col:{} color:{}>{}",
+				player_idx_,
+				field_cell.row,
+				field_cell.col,
+				static_cast<int>(game_color),
+				static_cast<int>(recognize_color));
+
+			field_cell.game_color = recognize_color;
+
 		}
 	}
+}
+
+bool player::wait_game_end() const
+{
+	return end_cell_.get_recognize_color() == color::g;
 }
 
 void player::update_all_cells(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)

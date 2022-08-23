@@ -10,6 +10,7 @@ enum class player_mode {
 	wait_game_start,
 	wait_nxt_stabilize,
 	wait_nxt_change,
+	wait_game_end,
 };
 
 class player
@@ -64,13 +65,14 @@ public:
 	[[nodiscard]] bool wait_game_reset(const cv::Mat& org_mat);
 	[[nodiscard]] bool wait_game_init(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
 	[[nodiscard]] bool game(int cur_no, const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
-	[[nodiscard]] bool wait_game_end() const;
 	void game_end();
 
 private:
 	void wait_nxt_stabilize();
+	bool wait_combo();
 	void wait_nxt_change();
 	void put_nxt();
+	[[nodiscard]] bool wait_game_end() const;
 
 	void update_all_cells(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
 	void update_nxt_cells(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);

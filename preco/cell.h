@@ -4,6 +4,12 @@
 
 #include "ring_buffer.h"
 
+enum class cell_type
+{
+	none = 0,
+	block = 1,
+};
+
 enum class color {
 	r = 0,
 	g = 1,
@@ -26,6 +32,8 @@ public:
 	static constexpr int v = 2;
 
 	cell();
+
+	cell_type type;
 
 	int row;
 	int col;

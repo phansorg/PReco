@@ -31,6 +31,7 @@ void settings::init()
 	json["capture_mode"] = capture_mode::jpeg;
     json["capture_path"] = "D:/puyo/movie/image_target";
     json["capture_start_no"] = 4210;
+    //json["capture_start_no"] = 6000;
     json["capture_last_no"] = 11085;
 
     json["log_path"] = "D:/puyo/movie/logs/log.txt";
@@ -50,6 +51,7 @@ void settings::init()
     json["game_debug_write"] = true;
     json["game_debug_path"] = "D:/puyo/movie/image_debug";
     json["game_start_mode"] = game_mode::wait_character_selection;
+    //json["game_start_mode"] = game_mode::wait_game_reset;
 
     std::ofstream ofs(settings_file_name);
     ofs << std::setw(json_indent) << json << std::endl;

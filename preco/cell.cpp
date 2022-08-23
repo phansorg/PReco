@@ -7,6 +7,7 @@
 
 cell::cell()
 {
+	type = cell_type::none;
 	row = -1;
 	col = -1;
 
@@ -26,10 +27,23 @@ void cell::set_rect(const cv::Rect in_rect)
 	frame_rect.width = in_rect.width;
 	frame_rect.height = in_rect.height;
 
-	recognize_rect.x = frame_rect.x + frame_rect.width / 4;
-	recognize_rect.y = frame_rect.y + frame_rect.height / 4;
-	recognize_rect.width = frame_rect.width / 2;
-	recognize_rect.height = frame_rect.height / 2;
+	switch (type)
+	{
+	case cell_type::none:
+		recognize_rect.x = frame_rect.x + frame_rect.width / 4;
+		recognize_rect.y = frame_rect.y + frame_rect.height / 4;
+		recognize_rect.width = frame_rect.width / 2;
+		recognize_rect.height = frame_rect.height / 2;
+		break;
+
+	case cell_type::block:
+		recognize_rect.x = frame_rect.x + frame_rect.width /10;
+		recognize_rect.y = frame_rect.y + frame_rect.height / 10;
+		recognize_rect.width = frame_rect.width * 4 / 5;
+		recognize_rect.height = frame_rect.height * 4 / 5;
+		break;
+	}
+
 }
 
 void cell::reset()
@@ -50,15 +64,15 @@ void cell::update_recognize_color(const cv::Scalar& bgr_scalar)
 	const auto b_val = static_cast<int>(bgr_scalar[b]);
 
 	auto recognize_color = color::none;
-	if (r_val > 150 && g_val < 120 && b_val < 120)
+	if (r_val > 160 && g_val < 140 && b_val < 140)
 		recognize_color = color::r;
-	else if (r_val < 130 && g_val > 173 && b_val < 120)
+	else if (r_val < 140 && g_val > 173 && b_val < 120)
 		recognize_color = color::g;
-	else if (r_val < 120 && g_val < 160 && b_val > 170)
+	else if (r_val < 140 && g_val < 160 && b_val > 170)
 		recognize_color = color::b;
-	else if (r_val > 210 && g_val > 173 && b_val < 173)
+	else if (r_val > 190 && g_val > 173 && b_val < 150)
 		recognize_color = color::y;
-	else if (r_val > 130 && g_val < 120 && b_val > 170)
+	else if (r_val > 140 && g_val < 140 && b_val > 170)
 		recognize_color = color::p;
 	else if (r_val > 168 && g_val > 173 && b_val > 173)
 		recognize_color = color::jam;
