@@ -11,7 +11,7 @@ player::player(const int player_idx)
 {
 	player_idx_ = player_idx;
 	player_mode_ = player_mode::wait_game_start;
-	cur_nxt_idx_ = -2;
+	cur_records_idx_ = -2;
 
 	auto& json = settings::get_instance()->json;
 	history_dir_ = json["player_history_dir"].get<std::string>();
@@ -218,8 +218,10 @@ bool player::wait_game_reset(const cv::Mat& org_mat)
 			nxt_cell.reset();
 		}
 	}
-	nxt_records_.clear();
-	cur_nxt_idx_ = -2;
+
+	// 最初は操作ぷよが無い状態のため、-1でリセットする
+	cur_records_idx_ = -1;
+	operation_records_.clear();
 
 	// comboをリセット
 	combo_cell_.reset();
@@ -235,7 +237,7 @@ bool player::wait_game_init(const cv::Mat& org_mat, const std::list<cv::Mat>& ma
 	const auto logger = spdlog::get(logger_main);
 
 	// 初期化済みの場合、OK
-	if (!nxt_records_.empty())
+	if (!operation_records_.empty())
 	{
 		SPDLOG_LOGGER_TRACE(logger, "wait_game_init ok p:{}", player_idx_);
 		return true;
@@ -255,11 +257,18 @@ bool player::wait_game_init(const cv::Mat& org_mat, const std::list<cv::Mat>& ma
 	// 初期化完了時のnxtを登録し、再度リセット(game_startで再度認識させるため)
 	for (auto& nxt_child_cells : nxt_cells_)
 	{
-		for (auto& nxt_cell : nxt_child_cells)
-		{
-			nxt_records_.push_back(nxt_cell.get_recognize_color());
-			nxt_cell.reset();
-		}
+		const operation operation_record{
+			{
+				nxt_child_cells[axis].get_recognize_color(),
+				nxt_child_cells[child].get_recognize_color()
+			},
+			-1,
+			-1
+		};
+		operation_records_.push_back(operation_record);
+
+		nxt_child_cells[axis].reset();
+		nxt_child_cells[child].reset();
 	}
 
 	// historyのファイル名を設定
@@ -330,9 +339,16 @@ void player::wait_nxt_stabilize()
 		}
 	}
 
-	nxt_records_.push_back(nxt_cells_[1][axis].get_recognize_color());
-	nxt_records_.push_back(nxt_cells_[1][child].get_recognize_color());
-	cur_nxt_idx_ += 2;
+	const operation operation_record{
+		{
+			nxt_cells_[1][axis].get_recognize_color(),
+			nxt_cells_[1][child].get_recognize_color()
+		},
+		-1,
+		-1
+	};
+	operation_records_.push_back(operation_record);
+	cur_records_idx_ += 1;
 
 	const auto logger = spdlog::get(logger_main);
 	player_mode_ = player_mode::wait_nxt_change;
@@ -344,6 +360,7 @@ bool player::wait_combo()
 	// スコアの白色(jam)部分が無くなったら連鎖開始
 	if (combo_cell_.get_recognize_color() == color::jam) return false;
 
+	// 消した後は、現時点では対応しない
 	const auto logger = spdlog::get(logger_main);
 	player_mode_ = player_mode::wait_game_end;
 	logger->info("p:{} player_mode:{}", player_idx_, static_cast<int>(player_mode_));
@@ -372,28 +389,81 @@ void player::put_nxt()
 {
 	const auto logger = spdlog::get(logger_main);
 
+	auto& [colors, col, rotate] = operation_records_[cur_records_idx_];
+
 	// nxtが変わった = 設置したのでfieldを再確認
-	cell put_cells[nxt_child_max];
+	std::list<int> put_rows;
+	std::list<int> put_cols;
 	for (auto& field_row : field_cells_)
 	{
 		for (auto& field_cell : field_row)
 		{
-			// 色が変化していない場合、対象外
 			const auto game_color = field_cell.game_color;
 			const auto recognize_color = field_cell.get_recognize_color();
+			// 色が変化していない場合、対象外
 			if (game_color == recognize_color) continue;
 
-			// 設置した
+			// gameの状態として設定
+			field_cell.game_color = recognize_color;
+
+			// 軸が先頭になるよう追加
+			if (colors[axis] == recognize_color)
+			{
+				put_rows.push_front(field_cell.row);
+				put_cols.push_front(field_cell.col);
+			}
+			else
+			{
+				put_rows.push_back(field_cell.row);
+				put_cols.push_back(field_cell.col);
+			}
+
 			logger->info("put_nxt p:{} row:{} col:{} color:{}>{}",
 				player_idx_,
 				field_cell.row,
 				field_cell.col,
 				static_cast<int>(game_color),
 				static_cast<int>(recognize_color));
-
-			field_cell.game_color = recognize_color;
-
 		}
+	}
+
+	// ズレが発生した(変化が2箇所でない)場合、現時点では対応しない
+	if (put_rows.size() != nxt_child_max)
+	{
+		player_mode_ = player_mode::wait_game_end;
+		logger->info("p:{} player_mode:{}", player_idx_, static_cast<int>(player_mode_));
+		return;
+	}
+
+	const auto axis_row = put_rows.front();
+	const auto axis_col = put_cols.front();
+	const auto child_row = put_rows.back();
+	const auto child_col = put_cols.back();
+	col = axis_col;
+	if (child_col == axis_col + 1)
+	{
+		rotate = 1;
+	}
+	else if (child_col == axis_col - 1)
+	{
+		rotate = 3;
+	}
+	else if (child_col == axis_col)
+	{
+		if (child_row > axis_row)
+		{
+			rotate = 0;
+		}
+		else
+		{
+			rotate = 2;
+		}
+	}
+	else
+	{
+		// ズレが発生した(列が離れている)場合、現時点では対応しない
+		player_mode_ = player_mode::wait_game_end;
+		logger->info("p:{} player_mode:{}", player_idx_, static_cast<int>(player_mode_));
 	}
 }
 
@@ -474,16 +544,19 @@ void player::write_history() const
 	to_field_text(field_text);
 
 	history_file
-		<< to_color_text(nxt_records_[cur_nxt_idx_])
-		<< to_color_text(nxt_records_[cur_nxt_idx_ + 1])
+		<< to_color_text(operation_records_[cur_records_idx_].colors[axis])
+		<< to_color_text(operation_records_[cur_records_idx_].colors[child])
 		<< ","
-		<< to_color_text(nxt_records_[cur_nxt_idx_ + 2])
-		<< to_color_text(nxt_records_[cur_nxt_idx_ + 3])
+		<< to_color_text(operation_records_[cur_records_idx_ + 1].colors[axis])
+		<< to_color_text(operation_records_[cur_records_idx_ + 1].colors[child])
 		<< ","
-		<< to_color_text(nxt_records_[cur_nxt_idx_ + 4])
-		<< to_color_text(nxt_records_[cur_nxt_idx_ + 5])
+		<< to_color_text(operation_records_[cur_records_idx_ + 2].colors[axis])
+		<< to_color_text(operation_records_[cur_records_idx_ + 2].colors[child])
 		<< ","
-	    << field_text
+		<< operation_records_[cur_records_idx_].col
+		<< operation_records_[cur_records_idx_].rotate
+		<< ","
+		<< field_text
 		<< std::endl;
 	history_file.close();
 }

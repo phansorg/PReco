@@ -27,10 +27,17 @@ public:
 	static constexpr int nxt_max = 2;
 	static constexpr int nxt_child_max = 2;
 
+	struct operation
+	{
+		color colors[nxt_child_max];
+		int col;
+		int rotate;
+	};
+
 private:
 	int player_idx_;
 	player_mode player_mode_;
-	int cur_nxt_idx_;
+	int cur_records_idx_;
 
 	std::string history_dir_;
 	std::filesystem::path history_path_;
@@ -41,7 +48,7 @@ private:
 	cell field_cells_[rows2][cols];
 
 	cell nxt_cells_[nxt_max][nxt_child_max];
-	std::vector<color> nxt_records_;
+	std::vector<operation> operation_records_;
 
 	cell end_cell_;
 	cell combo_cell_;
