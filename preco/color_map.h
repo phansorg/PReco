@@ -10,7 +10,7 @@ class color_map
 public:
 	void reset();
 	void insert(color from_color);
-	unsigned char to_key(color from_color) const;
+	[[nodiscard]] unsigned char to_key(color from_color) const;
 
 };
 
