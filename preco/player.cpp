@@ -16,6 +16,12 @@ player::player(const int player_idx)
 	auto& json = settings::get_instance()->json;
 	history_dir_ = json["player_history_dir"].get<std::string>();
 
+	// ディレクトリパスと出力ファイル名を結合
+	std::ostringstream file_name;
+	file_name << "game_record_" << player_idx_ << ".txt";
+	game_record_path_ = history_dir_;
+	game_record_path_.append(file_name.str());
+
 	// field
 	field_frame_rect_ = cv::Rect(
 		json["player_field_x"][player_idx_].get<int>(),
@@ -81,6 +87,9 @@ player::player(const int player_idx)
 	init_end_cell();
 	init_wait_character_selection_rect();
 	init_wait_reset_rect();
+
+	// 1試合目から開始
+	game_no_ = 1;
 }
 
 // ============================================================
@@ -229,6 +238,11 @@ bool player::wait_game_reset(const cv::Mat& org_mat)
 	// endをリセット
 	end_cell_.reset();
 
+	color_map_.reset();
+
+	// 試合数を加算
+	game_no_++;
+
 	return true;
 }
 
@@ -266,6 +280,8 @@ bool player::wait_game_init(const cv::Mat& org_mat, const std::list<cv::Mat>& ma
 			-1
 		};
 		operation_records_.push_back(operation_record);
+		color_map_.insert(operation_record.colors[axis]);
+		color_map_.insert(operation_record.colors[child]);
 
 		nxt_child_cells[axis].reset();
 		nxt_child_cells[child].reset();
@@ -325,6 +341,7 @@ bool player::game(int cur_no, const cv::Mat& org_mat, const std::list<cv::Mat>& 
 void player::game_end()
 {
 	const auto logger = spdlog::get(logger_main);
+	append_game_record();
 	player_mode_ = player_mode::wait_game_start;
 	logger->info("p:{} player_mode:{}", player_idx_, static_cast<int>(player_mode_));
 }
@@ -348,6 +365,8 @@ void player::wait_nxt_stabilize()
 		-1
 	};
 	operation_records_.push_back(operation_record);
+	color_map_.insert(operation_record.colors[axis]);
+	color_map_.insert(operation_record.colors[child]);
 	cur_records_idx_ += 1;
 
 	const auto logger = spdlog::get(logger_main);
@@ -584,6 +603,66 @@ void player::to_field_text(unsigned char* buffer) const
 			buffer[row * cols + col] = to_color_text(field_cells_[row][col].get_recognize_color());
 		}
 	}
+}
+
+void player::append_game_record() const
+{
+	std::ofstream game_record_file(game_record_path_, std::ios::app);
+	if (!game_record_file)
+	{
+		return;
+	}
+
+	constexpr int require_nxt_count = 16;
+
+	// 必要手数に満たないならスキップ
+	if (cur_records_idx_ < require_nxt_count - 1) return;
+
+	unsigned char nxt_key_array[require_nxt_count * 2 + 1] = { 0 };
+	unsigned char nxt_actual_array[require_nxt_count * 2 + 1] = { 0 };
+	unsigned char col_array[require_nxt_count + 1] = { 0 };
+	unsigned char rotate_array[require_nxt_count + 1] = { 0 };
+	for (auto idx = 0; idx < require_nxt_count; idx++)
+	{
+		const auto axis_color = operation_records_[idx].colors[axis];
+		const auto child_color = operation_records_[idx].colors[child];
+		const auto col = operation_records_[idx].col;
+		const auto rotate = operation_records_[idx].rotate;
+		if (axis_color == color::none ||
+			child_color == color::none ||
+			col < 0 ||
+			rotate < 0) {
+			game_record_file.close();
+			return;
+		}
+		
+		auto axis_key = color_map_.to_key(axis_color);
+		auto child_key = color_map_.to_key(child_color);
+		nxt_key_array[idx * 2] = std::min(axis_key, child_key);
+		nxt_key_array[idx * 2 + 1] = std::max(axis_key, child_key);
+		nxt_actual_array[idx * 2] = to_color_text(axis_color);
+		nxt_actual_array[idx * 2 + 1] = to_color_text(child_color);
+		col_array[idx] = '0' + col;
+		rotate_array[idx] = '0' + rotate;
+	}
+
+	game_record_file
+		<< 0
+		<< ","
+		<< 0
+		<< ","
+		<< game_no_
+		<< ","
+		<< nxt_key_array
+		<< ","
+		<< nxt_actual_array
+		<< ","
+		<< col_array
+		<< ","
+		<< rotate_array
+		<< std::endl;
+
+	game_record_file.close();
 }
 
 // ============================================================

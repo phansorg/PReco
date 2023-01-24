@@ -5,6 +5,7 @@
 #include <opencv2/core/types.hpp>
 
 #include "cell.h"
+#include "color_map.h"
 
 enum class player_mode {
 	wait_game_start,
@@ -41,6 +42,7 @@ private:
 
 	std::string history_dir_;
 	std::filesystem::path history_path_;
+	std::filesystem::path game_record_path_;
 
 	cv::Rect field_frame_rect_;
 	int cell_width_;
@@ -55,6 +57,11 @@ private:
 
 	cv::Rect wait_character_selection_rect_;
 	cv::Rect wait_reset_rect_;
+
+	// ééçáêî
+	int game_no_;
+
+	color_map color_map_;
 
 public:
 	explicit player(int player_idx);
@@ -88,6 +95,7 @@ private:
 	void write_history() const;
 	static unsigned char to_color_text(color from_color);
 	void to_field_text(unsigned char* buffer) const;
+	void append_game_record() const;
 
 public:
 	void debug_render(const cv::Mat& debug_mat) const;
