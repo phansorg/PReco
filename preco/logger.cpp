@@ -16,7 +16,7 @@ constexpr auto truncate = false;
 constexpr auto max_files = 7;
 
 void init_logger() {
-    auto& json = settings::get_instance()->json;
+    auto& json = Settings::get_instance()->json_;
     auto file_path = json["log_path"].get<std::string>();
 
     spdlog::init_thread_pool(q_size, thread_count);
@@ -40,7 +40,7 @@ void init_logger() {
         daily_sink
     };
     const auto logger = std::make_shared<spdlog::async_logger>(
-        logger_main,
+        kLoggerMain,
         sinks.begin(),
         sinks.end(),
         spdlog::thread_pool(),

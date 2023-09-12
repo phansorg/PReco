@@ -4,18 +4,18 @@
 
 #include "game_thread.h"
 
-enum class capture_mode { 
-	jpeg = 0,
+enum class CaptureMode { 
+	kJpeg = 0,
 };
 
-class capture_thread
+class CaptureThread
 {
 	const int jpeg_file_zero_count_ = 7;
 
 	bool thread_loop_;
 
 	std::shared_ptr<game_thread> game_thread_ptr_;
-	capture_mode mode_;
+	CaptureMode mode_;
 	std::string path_;
 	int start_no_;
 	int last_no_;
@@ -23,7 +23,7 @@ class capture_thread
 	int cur_no_;
 
 public:
-	capture_thread(const std::shared_ptr<game_thread>& game_thread_ptr);
+	explicit CaptureThread(const std::shared_ptr<game_thread>& game_thread_ptr);
 
 	void run();
 	void request_end();

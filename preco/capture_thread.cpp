@@ -6,14 +6,14 @@
 
 #include <filesystem>
 
-capture_thread::capture_thread(const std::shared_ptr<game_thread>& game_thread_ptr) {
+CaptureThread::CaptureThread(const std::shared_ptr<game_thread>& game_thread_ptr) {
 
 	thread_loop_ = true;
 
 	game_thread_ptr_ = game_thread_ptr;
 
-	auto& json = settings::get_instance()->json;
-	mode_ = static_cast<capture_mode>(json["capture_mode"].get<int>());
+	auto& json = Settings::get_instance()->json_;
+	mode_ = static_cast<CaptureMode>(json["capture_mode"].get<int>());
 	path_ = json["capture_path"].get<std::string>();
 	start_no_ = json["capture_start_no"].get<int>();
 	last_no_ = json["capture_last_no"].get<int>();
@@ -21,16 +21,16 @@ capture_thread::capture_thread(const std::shared_ptr<game_thread>& game_thread_p
 	cur_no_ = start_no_;
 }
 
-void capture_thread::run()
+void CaptureThread::run()
 {
-	const auto logger = spdlog::get(logger_main);
+	const auto logger = spdlog::get(kLoggerMain);
 	SPDLOG_LOGGER_DEBUG(logger, "start");
 
 	while (thread_loop_)
     {
 		process();
 		SPDLOG_LOGGER_TRACE(logger, "sleep");
-		std::this_thread::sleep_for(std::chrono::milliseconds(thread_sleep_ms));
+		std::this_thread::sleep_for(std::chrono::milliseconds(kThreadSleepMs));
     }
 
 	// メインスレッドのキー押下ではなく、
@@ -40,24 +40,24 @@ void capture_thread::run()
 	SPDLOG_LOGGER_DEBUG(logger, "end");
 }
 
-void capture_thread::request_end()
+void CaptureThread::request_end()
 {
     thread_loop_ = false;
 }
 
-void capture_thread::process()
+void CaptureThread::process()
 {
 	switch(mode_)
 	{
-	case capture_mode::jpeg:
+	case CaptureMode::kJpeg:
 		read_jpeg();
 		break;
 	}
 }
 
-void capture_thread::read_jpeg()
+void CaptureThread::read_jpeg()
 {
-	const auto logger = spdlog::get(logger_main);
+	const auto logger = spdlog::get(kLoggerMain);
 
 	for (; cur_no_ <= last_no_; cur_no_++)
 	{

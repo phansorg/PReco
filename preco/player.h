@@ -7,37 +7,37 @@
 #include "cell.h"
 #include "color_map.h"
 
-enum class player_mode {
-	wait_game_start,
-	wait_nxt_stabilize,
-	wait_nxt_change,
-	wait_game_end,
+enum class PlayerMode {
+	kWaitGameStart,
+	kWaitNxtStabilize,
+	kWaitNxtChange,
+	kWaitGameEnd,
 };
 
-class player
+class Player
 {
 public:
-	static constexpr int p1 = 0;
-	static constexpr int p2 = 1;
-	static constexpr int axis = 0;
-	static constexpr int child = 1;
+	static constexpr int p1_ = 0;
+	static constexpr int p2_ = 1;
+	static constexpr int axis_ = 0;
+	static constexpr int child_ = 1;
 
-	static constexpr int rows0 = 12;
-	static constexpr int rows2 = 14;
-	static constexpr int cols = 6;
-	static constexpr int nxt_max = 2;
-	static constexpr int nxt_child_max = 2;
+	static constexpr int rows0_ = 12;
+	static constexpr int rows2_ = 14;
+	static constexpr int cols_ = 6;
+	static constexpr int nxt_max_ = 2;
+	static constexpr int nxt_child_max_ = 2;
 
-	struct operation
+	struct Operation
 	{
-		color colors[nxt_child_max];
+		color colors[nxt_child_max_];
 		int col;
 		int rotate;
 	};
 
 private:
 	int player_idx_;
-	player_mode player_mode_;
+	PlayerMode player_mode_;
 	int cur_records_idx_;
 
 	std::string history_dir_;
@@ -47,13 +47,13 @@ private:
 	cv::Rect field_frame_rect_;
 	int cell_width_;
 	int cell_height_;
-	cell field_cells_[rows2][cols];
+	Cell field_cells_[rows2_][cols_];
 
-	cell nxt_cells_[nxt_max][nxt_child_max];
-	std::vector<operation> operation_records_;
+	Cell nxt_cells_[nxt_max_][nxt_child_max_];
+	std::vector<Operation> operation_records_;
 
-	cell end_cell_;
-	cell combo_cell_;
+	Cell end_cell_;
+	Cell combo_cell_;
 
 	cv::Rect wait_character_selection_rect_;
 	cv::Rect wait_reset_rect_;
@@ -61,10 +61,10 @@ private:
 	// ééçáêî
 	int game_no_;
 
-	color_map color_map_;
+	ColorMap color_map_;
 
 public:
-	explicit player(int player_idx);
+	explicit Player(int player_idx);
 
 private:
 	void init_field_cells();
@@ -90,7 +90,7 @@ private:
 
 	void update_all_cells(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
 	void update_nxt_cells(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories);
-	void update_cell(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories, cell& target_cell) const;
+	void update_cell(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories, Cell& target_cell) const;
 
 	void write_history() const;
 	static unsigned char to_color_text(color from_color);

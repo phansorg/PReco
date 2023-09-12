@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 
-class ring_buffer
+class RingBuffer
 {
 	int records_;
 	int rows_;
@@ -13,7 +13,7 @@ class ring_buffer
 
 
 public:
-	explicit ring_buffer(int init_value = 0, int records = 1, int rows = 1, int cols = 1);
+	explicit RingBuffer(int init_value = 0, int records = 1, int rows = 1, int cols = 1);
 	void reset(int init_value = 0);
 	void next_record();
 	void prev_record();

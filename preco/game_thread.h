@@ -5,12 +5,12 @@
 #include <mutex>
 #include "player.h"
 
-enum class game_mode {
-	wait_character_selection,
-	wait_game_reset,
-	wait_game_init,
-	wait_game_start,
-	wait_game_end,
+enum class GameMode {
+	kWaitCharacterSelection,
+	kWaitGameReset,
+	kWaitGameInit,
+	kWaitGameStart,
+	kWaitGameEnd,
 };
 
 class game_thread
@@ -25,7 +25,7 @@ class game_thread
 
 	bool debug_write_;
 	std::string debug_path_;
-	game_mode game_mode_;
+	GameMode game_mode_;
 	bool first_game_;
 	int game_start_no_;
 
@@ -34,7 +34,7 @@ class game_thread
 	std::mutex capture_mat_queue_mutex_;
 	std::queue<cv::Mat> capture_mat_queue_;
 
-	std::vector<std::unique_ptr<player>> players_;
+	std::vector<std::unique_ptr<Player>> players_;
 
 	std::list<cv::Mat> mat_histories_;
 public:

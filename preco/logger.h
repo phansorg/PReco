@@ -6,6 +6,6 @@
 
 #include <spdlog/spdlog.h>
 
-constexpr auto logger_main = "main";
+constexpr auto kLoggerMain = "main";
 
 void init_logger();

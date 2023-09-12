@@ -5,80 +5,80 @@
 #include "logger.h"
 #include "settings.h"
 
-cell::cell()
+Cell::Cell()
 {
-	type = cell_type::none;
-	row = -1;
-	col = -1;
+	type_ = CellType::kNone;
+	row_ = -1;
+	col_ = -1;
 
-	frame_rect = cv::Rect(0, 0, 0, 0);
-	recognize_rect = cv::Rect(0, 0, 0, 0);
+	frame_rect_ = cv::Rect(0, 0, 0, 0);
+	recognize_rect_ = cv::Rect(0, 0, 0, 0);
 
-	game_color = color::none;
-	recognize_color_ = color::none;
-	mse_ring_buffer_ = ring_buffer(settings::mse_init, settings::history_max);
+	game_color_ = color::kNone;
+	recognize_color_ = color::kNone;
+	mse_ring_buffer_ = RingBuffer(Settings::mse_init_, Settings::history_max_);
 	stabilize_count_ = 0;
 }
 
-void cell::set_rect(const cv::Rect in_rect)
+void Cell::set_rect(const cv::Rect in_rect)
 {
-	frame_rect.x = in_rect.x;
-	frame_rect.y = in_rect.y;
-	frame_rect.width = in_rect.width;
-	frame_rect.height = in_rect.height;
+	frame_rect_.x = in_rect.x;
+	frame_rect_.y = in_rect.y;
+	frame_rect_.width = in_rect.width;
+	frame_rect_.height = in_rect.height;
 
-	switch (type)
+	switch (type_)
 	{
-	case cell_type::none:
-		recognize_rect.x = frame_rect.x + frame_rect.width / 4;
-		recognize_rect.y = frame_rect.y + frame_rect.height / 4;
-		recognize_rect.width = frame_rect.width / 2;
-		recognize_rect.height = frame_rect.height / 2;
+	case CellType::kNone:
+		recognize_rect_.x = frame_rect_.x + frame_rect_.width / 4;
+		recognize_rect_.y = frame_rect_.y + frame_rect_.height / 4;
+		recognize_rect_.width = frame_rect_.width / 2;
+		recognize_rect_.height = frame_rect_.height / 2;
 		break;
 
-	case cell_type::block:
-		recognize_rect.x = frame_rect.x + frame_rect.width /10;
-		recognize_rect.y = frame_rect.y + frame_rect.height / 10;
-		recognize_rect.width = frame_rect.width * 4 / 5;
-		recognize_rect.height = frame_rect.height * 4 / 5;
+	case CellType::kBlock:
+		recognize_rect_.x = frame_rect_.x + frame_rect_.width /10;
+		recognize_rect_.y = frame_rect_.y + frame_rect_.height / 10;
+		recognize_rect_.width = frame_rect_.width * 4 / 5;
+		recognize_rect_.height = frame_rect_.height * 4 / 5;
 		break;
 	}
 
 }
 
-void cell::reset()
+void Cell::reset()
 {
-	game_color = color::none;
-	recognize_color_ = color::none;
-	mse_ring_buffer_.reset(settings::mse_init);
+	game_color_ = color::kNone;
+	recognize_color_ = color::kNone;
+	mse_ring_buffer_.reset(Settings::mse_init_);
 	stabilize_count_ = 0;
 }
 
-void cell::update_recognize_color(const cv::Scalar& bgr_scalar)
+void Cell::update_recognize_color(const cv::Scalar& bgr_scalar)
 {
-	if (row >= 12) return;
-	if (row == 11 && col == 2) return;
+	if (row_ >= 12) return;
+	if (row_ == 11 && col_ == 2) return;
 
-	const auto r_val = static_cast<int>(bgr_scalar[r]);
-	const auto g_val = static_cast<int>(bgr_scalar[g]);
-	const auto b_val = static_cast<int>(bgr_scalar[b]);
+	const auto r_val = static_cast<int>(bgr_scalar[r_]);
+	const auto g_val = static_cast<int>(bgr_scalar[g_]);
+	const auto b_val = static_cast<int>(bgr_scalar[b_]);
 
-	auto recognize_color = color::none;
+	auto recognize_color = color::kNone;
 	if (r_val > 160 && g_val < 140 && b_val < 140)
-		recognize_color = color::r;
+		recognize_color = color::kR;
 	else if (r_val < 140 && g_val > 173 && b_val < 120)
-		recognize_color = color::g;
+		recognize_color = color::kG;
 	else if (r_val < 140 && g_val < 160 && b_val > 170)
-		recognize_color = color::b;
+		recognize_color = color::kB;
 	else if (r_val > 190 && g_val > 173 && b_val < 150)
-		recognize_color = color::y;
+		recognize_color = color::kY;
 	else if (r_val > 140 && g_val < 140 && b_val > 170)
-		recognize_color = color::p;
+		recognize_color = color::kP;
 	else if (r_val > 168 && g_val > 173 && b_val > 173)
-		recognize_color = color::jam;
+		recognize_color = color::kJam;
 	recognize_color_ = recognize_color;
 
-	const auto logger = spdlog::get(logger_main);
+	const auto logger = spdlog::get(kLoggerMain);
 	SPDLOG_LOGGER_TRACE(logger, "row:{} col:{} r:{} g:{} b:{} color:{}",
 		row,
 		col,
@@ -89,14 +89,14 @@ void cell::update_recognize_color(const cv::Scalar& bgr_scalar)
 	);
 }
 
-color cell::get_recognize_color() const
+color Cell::get_recognize_color() const
 {
 	return recognize_color_;
 }
 
-void cell::set_mse(const cv::Scalar& hsv_scalar)
+void Cell::set_mse(const cv::Scalar& hsv_scalar)
 {
-	const auto mse = static_cast<int>(hsv_scalar[h] + hsv_scalar[s] + hsv_scalar[v]);
+	const auto mse = static_cast<int>(hsv_scalar[h_] + hsv_scalar[s_] + hsv_scalar[v_]);
 	mse_ring_buffer_.next_record();
 	mse_ring_buffer_.set(mse);
 	
@@ -109,50 +109,50 @@ void cell::set_mse(const cv::Scalar& hsv_scalar)
 	stabilize_count_++;
 }
 
-int cell::get_mse() const
+int Cell::get_mse() const
 {
 	return mse_ring_buffer_.get();
 }
 
-bool cell::is_stabilizing() const
+bool Cell::is_stabilizing() const
 {
 	return stabilize_count_ >= 1;
 }
 
-bool cell::is_stabilized() const
+bool Cell::is_stabilized() const
 {
 	return stabilize_count_ >= 2;
 }
 
-void cell::debug_render(const cv::Mat& debug_mat) const
+void Cell::debug_render(const cv::Mat& debug_mat) const
 {
 	// frame_rect
 	cv::Scalar bgr_scalar;
 	switch (recognize_color_)
 	{
-	case color::none:
+	case color::kNone:
 		bgr_scalar = cv::Scalar(0, 0, 0);
 		break;
-	case color::r:
+	case color::kR:
 		bgr_scalar = cv::Scalar(0, 0, 255);
 		break;
-	case color::g:
+	case color::kG:
 		bgr_scalar = cv::Scalar(0, 255, 0);
 		break;
-	case color::b:
+	case color::kB:
 		bgr_scalar = cv::Scalar(255, 128, 0);
 		break;
-	case color::y:
+	case color::kY:
 		bgr_scalar = cv::Scalar(0, 255, 255);
 		break;
-	case color::p:
+	case color::kP:
 		bgr_scalar = cv::Scalar(255, 0, 192);
 		break;
-	case color::jam:
+	case color::kJam:
 		bgr_scalar = cv::Scalar(255, 255, 255);
 		break;
 	}
-	render_rect(debug_mat, frame_rect, bgr_scalar);
+	render_rect(debug_mat, frame_rect_, bgr_scalar);
 
 	// recognize_rect
 	if (is_stabilized())
@@ -161,9 +161,9 @@ void cell::debug_render(const cv::Mat& debug_mat) const
 		bgr_scalar = cv::Scalar(0, 255, 0);
 	else
 		bgr_scalar = cv::Scalar(0, 0, 255);
-	render_rect(debug_mat, recognize_rect, bgr_scalar);
+	render_rect(debug_mat, recognize_rect_, bgr_scalar);
 }
-void cell::render_rect(const cv::Mat& debug_mat, const cv::Rect rect, const cv::Scalar& bgr_scalar) const
+void Cell::render_rect(const cv::Mat& debug_mat, const cv::Rect rect, const cv::Scalar& bgr_scalar) const
 {
 	const auto x1 = rect.x;
 	const auto y1 = rect.y;

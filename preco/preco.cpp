@@ -9,13 +9,13 @@
 
 void run_threads()
 {
-    const auto logger = spdlog::get(logger_main);
+    const auto logger = spdlog::get(kLoggerMain);
 
     // スレッド開始
     const auto game_thread_ptr = std::make_shared<game_thread>();
     std::thread th_game{ [&] { game_thread_ptr->run(); } };
 
-	const auto capture_thread_ptr = std::make_shared<capture_thread>(game_thread_ptr);
+	const auto capture_thread_ptr = std::make_shared<CaptureThread>(game_thread_ptr);
     std::thread th_capture{ [&] { capture_thread_ptr->run(); } };
 
     // キー押下待ち
@@ -35,12 +35,12 @@ void run_threads()
 int main()
 {
     // 設定とロガーの初期化
-    const auto settings_instance = settings::get_instance();
+    const auto settings_instance = Settings::get_instance();
     settings_instance->init();
     init_logger();
 
 	// 開始ログ
-    const auto logger = spdlog::get(logger_main);
+    const auto logger = spdlog::get(kLoggerMain);
     SPDLOG_LOGGER_DEBUG(logger, "********** application start **********");
     logger->info(settings_instance->dump());
 

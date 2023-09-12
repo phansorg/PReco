@@ -7,13 +7,13 @@
 #include "settings.h"
 #include "logger.h"
 
-player::player(const int player_idx)
+Player::Player(const int player_idx)
 {
 	player_idx_ = player_idx;
-	player_mode_ = player_mode::wait_game_start;
+	player_mode_ = PlayerMode::kWaitGameStart;
 	cur_records_idx_ = -2;
 
-	auto& json = settings::get_instance()->json;
+	auto& json = Settings::get_instance()->json_;
 	history_dir_ = json["player_history_dir"].get<std::string>();
 
 	// ディレクトリパスと出力ファイル名を結合
@@ -29,15 +29,15 @@ player::player(const int player_idx)
 		json["player_field_w"].get<int>(),
 		json["player_field_h"].get<int>()
 	);
-	cell_width_ = field_frame_rect_.width / cols;
-	cell_height_ = field_frame_rect_.height / rows0;
+	cell_width_ = field_frame_rect_.width / cols_;
+	cell_height_ = field_frame_rect_.height / rows0_;
 
 	// nxt1
 	auto row = 0;
-	auto col = axis;
-	nxt_cells_[row][col].type = cell_type::block;
-	nxt_cells_[row][col].row = row;
-	nxt_cells_[row][col].col = col;
+	auto col = axis_;
+	nxt_cells_[row][col].type_ = CellType::kBlock;
+	nxt_cells_[row][col].row_ = row;
+	nxt_cells_[row][col].col_ = col;
 	nxt_cells_[row][col].set_rect(cv::Rect(
 		json["player_nxt1_x"][player_idx_].get<int>(),
 		json["player_nxt1_y"].get<int>(),
@@ -45,32 +45,32 @@ player::player(const int player_idx)
 		cell_height_
 	));
 
-	auto clone_rect = nxt_cells_[row][col].frame_rect;
-	col = child;
+	auto clone_rect = nxt_cells_[row][col].frame_rect_;
+	col = child_;
 	clone_rect.y += clone_rect.height;
-	nxt_cells_[row][col].type = cell_type::block;
-	nxt_cells_[row][col].row = row;
-	nxt_cells_[row][col].col = col;
+	nxt_cells_[row][col].type_ = CellType::kBlock;
+	nxt_cells_[row][col].row_ = row;
+	nxt_cells_[row][col].col_ = col;
 	nxt_cells_[row][col].set_rect(clone_rect);
 
 	// nxt2
 	row = 1;
-	col = axis;
-	nxt_cells_[row][col].type = cell_type::block;
-	nxt_cells_[row][col].row = row;
-	nxt_cells_[row][col].col = col;
+	col = axis_;
+	nxt_cells_[row][col].type_ = CellType::kBlock;
+	nxt_cells_[row][col].row_ = row;
+	nxt_cells_[row][col].col_ = col;
 	nxt_cells_[row][col].set_rect(cv::Rect(
 		json["player_nxt2_x"][player_idx_].get<int>(),
 		json["player_nxt2_y"].get<int>(),
 		cell_width_ * 4 / 5,
 		cell_height_ * 4 / 5
 	));
-	clone_rect = nxt_cells_[row][col].frame_rect;
-	col = child;
+	clone_rect = nxt_cells_[row][col].frame_rect_;
+	col = child_;
 	clone_rect.y += clone_rect.height;
-	nxt_cells_[row][col].type = cell_type::block;
-	nxt_cells_[row][col].row = 1;
-	nxt_cells_[row][col].col = col;
+	nxt_cells_[row][col].type_ = CellType::kBlock;
+	nxt_cells_[row][col].row_ = 1;
+	nxt_cells_[row][col].col_ = col;
 	nxt_cells_[row][col].set_rect(clone_rect);
 
 	// combo
@@ -95,22 +95,22 @@ player::player(const int player_idx)
 // ============================================================
 // rect
 // ============================================================
-void player::init_field_cells()
+void Player::init_field_cells()
 {
 	const auto width = field_frame_rect_.width;
 	const auto height = field_frame_rect_.height;
-	for (int row = 0; row < rows2; row++)
+	for (int row = 0; row < rows2_; row++)
 	{
-		const auto y_idx = rows2 - row - 3;
-		const auto y1 = height * y_idx / rows0 + field_frame_rect_.y;
-		const auto y2 = height * (y_idx + 1) / rows0 + field_frame_rect_.y;
-		for (int col = 0; col < cols; col++)
+		const auto y_idx = rows2_ - row - 3;
+		const auto y1 = height * y_idx / rows0_ + field_frame_rect_.y;
+		const auto y2 = height * (y_idx + 1) / rows0_ + field_frame_rect_.y;
+		for (int col = 0; col < cols_; col++)
 		{
-			const auto x1 = width * col / cols + field_frame_rect_.x;
-			const auto x2 = width * (col + 1) / cols + field_frame_rect_.x;
-			field_cells_[row][col].type = cell_type::block;
-			field_cells_[row][col].row = row;
-			field_cells_[row][col].col = col;
+			const auto x1 = width * col / cols_ + field_frame_rect_.x;
+			const auto x2 = width * (col + 1) / cols_ + field_frame_rect_.x;
+			field_cells_[row][col].type_ = CellType::kBlock;
+			field_cells_[row][col].row_ = row;
+			field_cells_[row][col].col_ = col;
 			field_cells_[row][col].set_rect(cv::Rect(
 				x1,
 				y1,
@@ -121,11 +121,11 @@ void player::init_field_cells()
 	}
 }
 
-void player::init_combo_cell()
+void Player::init_combo_cell()
 {
 	// スコアの左端が変化したらcombo
 	const auto width = cell_width_ / 2;
-	const auto x = player_idx_ == p1 ?
+	const auto x = player_idx_ == p1_ ?
 		field_frame_rect_.x : field_frame_rect_.x + field_frame_rect_.width - width;
 	end_cell_.set_rect(cv::Rect(
 		x,
@@ -135,11 +135,11 @@ void player::init_combo_cell()
 	));
 }
 
-void player::init_end_cell()
+void Player::init_end_cell()
 {
 	// 角の領域が全て緑であればend
 	const auto width = cell_width_ / 2;
-	const auto x = player_idx_ == p1 ?
+	const auto x = player_idx_ == p1_ ?
 		field_frame_rect_.x : field_frame_rect_.x + field_frame_rect_.width - width;
 	end_cell_.set_rect(cv::Rect(
 		x,
@@ -149,11 +149,11 @@ void player::init_end_cell()
 	));
 }
 
-void player::init_wait_character_selection_rect()
+void Player::init_wait_character_selection_rect()
 {
 	// 1P盤面の上半分領域が全て赤であればOK
 	// 2P盤面の下半分領域が全て緑であればOK
-	const auto y = player_idx_ == p1 ? 
+	const auto y = player_idx_ == p1_ ? 
 		field_frame_rect_.y : field_frame_rect_.y + field_frame_rect_.height / 2;
 	wait_character_selection_rect_ = cv::Rect(
 		field_frame_rect_.x,
@@ -163,7 +163,7 @@ void player::init_wait_character_selection_rect()
 	);
 }
 
-void player::init_wait_reset_rect()
+void Player::init_wait_reset_rect()
 {
 	// 盤面の中央領域が全て黒であればOK
 	wait_reset_rect_ = cv::Rect(
@@ -178,32 +178,32 @@ void player::init_wait_reset_rect()
 // game
 // ============================================================
 
-bool player::wait_character_selection(const cv::Mat& org_mat) const
+bool Player::wait_character_selection(const cv::Mat& org_mat) const
 {
 	std::vector<cv::Mat> channels;
 	cv::Point* pos = nullptr;
 
 	const auto roi_mat = org_mat(wait_reset_rect_);
 	split(roi_mat, channels);
-	if (player_idx_ == p1)
+	if (player_idx_ == p1_)
 	{
 		// 1P盤面の上半分領域が全て赤であればOK
-		if (!checkRange(channels[cell::b], true, pos, 0, 100)) return false;
-		if (!checkRange(channels[cell::g], true, pos, 0, 100)) return false;
-		if (!checkRange(channels[cell::r], true, pos, 180, 255)) return false;
+		if (!checkRange(channels[Cell::b_], true, pos, 0, 100)) return false;
+		if (!checkRange(channels[Cell::g_], true, pos, 0, 100)) return false;
+		if (!checkRange(channels[Cell::r_], true, pos, 180, 255)) return false;
 	}
 	else
 	{
 		// 2P盤面の下半分領域が全て緑であればOK
-		if (!checkRange(channels[cell::b], true, pos, 0, 100)) return false;
-		if (!checkRange(channels[cell::g], true, pos, 180, 255)) return false;
-		if (!checkRange(channels[cell::r], true, pos, 0, 100)) return false;
+		if (!checkRange(channels[Cell::b_], true, pos, 0, 100)) return false;
+		if (!checkRange(channels[Cell::g_], true, pos, 180, 255)) return false;
+		if (!checkRange(channels[Cell::r_], true, pos, 0, 100)) return false;
 	}
 
 	return true;
 }
 
-bool player::wait_game_reset(const cv::Mat& org_mat)
+bool Player::wait_game_reset(const cv::Mat& org_mat)
 {
 	// 盤面の中央領域が全て黒であればOK
 	cv::Point* pos = nullptr;
@@ -246,9 +246,9 @@ bool player::wait_game_reset(const cv::Mat& org_mat)
 	return true;
 }
 
-bool player::wait_game_init(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)
+bool Player::wait_game_init(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)
 {
-	const auto logger = spdlog::get(logger_main);
+	const auto logger = spdlog::get(kLoggerMain);
 
 	// 初期化済みの場合、OK
 	if (!operation_records_.empty())
@@ -264,27 +264,27 @@ bool player::wait_game_init(const cv::Mat& org_mat, const std::list<cv::Mat>& ma
 		for (auto& nxt_cell : nxt_child_cells)
 		{
 			if (!nxt_cell.is_stabilized()) return false;
-			if (nxt_cell.get_recognize_color() == color::none) return false;
+			if (nxt_cell.get_recognize_color() == color::kNone) return false;
 		}
 	}
 
 	// 初期化完了時のnxtを登録し、再度リセット(game_startで再度認識させるため)
 	for (auto& nxt_child_cells : nxt_cells_)
 	{
-		const operation operation_record{
+		const Operation operation_record{
 			{
-				nxt_child_cells[axis].get_recognize_color(),
-				nxt_child_cells[child].get_recognize_color()
+				nxt_child_cells[axis_].get_recognize_color(),
+				nxt_child_cells[child_].get_recognize_color()
 			},
 			-1,
 			-1
 		};
 		operation_records_.push_back(operation_record);
-		color_map_.insert(operation_record.colors[axis]);
-		color_map_.insert(operation_record.colors[child]);
+		color_map_.insert(operation_record.colors[axis_]);
+		color_map_.insert(operation_record.colors[child_]);
 
-		nxt_child_cells[axis].reset();
-		nxt_child_cells[child].reset();
+		nxt_child_cells[axis_].reset();
+		nxt_child_cells[child_].reset();
 	}
 
 	// historyのファイル名を設定
@@ -309,44 +309,44 @@ bool player::wait_game_init(const cv::Mat& org_mat, const std::list<cv::Mat>& ma
 	history_path_.append(file_name.str());
 
 	// player_modeをゲーム開始後にセット
-	player_mode_ = player_mode::wait_nxt_stabilize;
+	player_mode_ = PlayerMode::kWaitNxtStabilize;
 	logger->info("p:{} player_mode:{}", player_idx_, static_cast<int>(player_mode_));
 
 	return true;
 }
 
-bool player::game(int cur_no, const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)
+bool Player::game(int cur_no, const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)
 {
 	update_all_cells(org_mat, mat_histories);
 
 	switch (player_mode_)
 	{
-	case player_mode::wait_game_start:
+	case PlayerMode::kWaitGameStart:
 		break;
-	case player_mode::wait_nxt_stabilize:
+	case PlayerMode::kWaitNxtStabilize:
 		wait_nxt_stabilize();
 		break;
-	case player_mode::wait_nxt_change:
+	case PlayerMode::kWaitNxtChange:
 		if (wait_combo())
 			break;
 		wait_nxt_change();
 		break;
-	case player_mode::wait_game_end:
+	case PlayerMode::kWaitGameEnd:
 		break;
 	}
 
 	return wait_game_end();
 }
 
-void player::game_end()
+void Player::game_end()
 {
-	const auto logger = spdlog::get(logger_main);
+	const auto logger = spdlog::get(kLoggerMain);
 	append_game_record();
-	player_mode_ = player_mode::wait_game_start;
+	player_mode_ = PlayerMode::kWaitGameStart;
 	logger->info("p:{} player_mode:{}", player_idx_, static_cast<int>(player_mode_));
 }
 
-void player::wait_nxt_stabilize()
+void Player::wait_nxt_stabilize()
 {
 	for (auto& nxt_child_cells : nxt_cells_)
 	{
@@ -356,37 +356,37 @@ void player::wait_nxt_stabilize()
 		}
 	}
 
-	const operation operation_record{
+	const Operation operation_record{
 		{
-			nxt_cells_[1][axis].get_recognize_color(),
-			nxt_cells_[1][child].get_recognize_color()
+			nxt_cells_[1][axis_].get_recognize_color(),
+			nxt_cells_[1][child_].get_recognize_color()
 		},
 		-1,
 		-1
 	};
 	operation_records_.push_back(operation_record);
-	color_map_.insert(operation_record.colors[axis]);
-	color_map_.insert(operation_record.colors[child]);
+	color_map_.insert(operation_record.colors[axis_]);
+	color_map_.insert(operation_record.colors[child_]);
 	cur_records_idx_ += 1;
 
-	const auto logger = spdlog::get(logger_main);
-	player_mode_ = player_mode::wait_nxt_change;
+	const auto logger = spdlog::get(kLoggerMain);
+	player_mode_ = PlayerMode::kWaitNxtChange;
 	logger->info("p:{} player_mode:{}", player_idx_, static_cast<int>(player_mode_));
 }
 
-bool player::wait_combo()
+bool Player::wait_combo()
 {
 	// スコアの白色(jam)部分が無くなったら連鎖開始
-	if (combo_cell_.get_recognize_color() == color::jam) return false;
+	if (combo_cell_.get_recognize_color() == color::kJam) return false;
 
 	// 消した後は、現時点では対応しない
-	const auto logger = spdlog::get(logger_main);
-	player_mode_ = player_mode::wait_game_end;
+	const auto logger = spdlog::get(kLoggerMain);
+	player_mode_ = PlayerMode::kWaitGameEnd;
 	logger->info("p:{} player_mode:{}", player_idx_, static_cast<int>(player_mode_));
 	return true;
 }
 
-void player::wait_nxt_change()
+void Player::wait_nxt_change()
 {
 	for (auto& nxt_child_cells : nxt_cells_)
 	{
@@ -399,14 +399,14 @@ void player::wait_nxt_change()
 	put_nxt();
 	write_history();
 
-	const auto logger = spdlog::get(logger_main);
-	player_mode_ = player_mode::wait_nxt_stabilize;
+	const auto logger = spdlog::get(kLoggerMain);
+	player_mode_ = PlayerMode::kWaitNxtStabilize;
 	logger->info("p:{} player_mode:{}", player_idx_, static_cast<int>(player_mode_));
 }
 
-void player::put_nxt()
+void Player::put_nxt()
 {
-	const auto logger = spdlog::get(logger_main);
+	const auto logger = spdlog::get(kLoggerMain);
 
 	auto& [colors, col, rotate] = operation_records_[cur_records_idx_];
 
@@ -417,39 +417,39 @@ void player::put_nxt()
 	{
 		for (auto& field_cell : field_row)
 		{
-			const auto game_color = field_cell.game_color;
+			const auto game_color = field_cell.game_color_;
 			const auto recognize_color = field_cell.get_recognize_color();
 			// 色が変化していない場合、対象外
 			if (game_color == recognize_color) continue;
 
 			// gameの状態として設定
-			field_cell.game_color = recognize_color;
+			field_cell.game_color_ = recognize_color;
 
 			// 軸が先頭になるよう追加
-			if (colors[axis] == recognize_color)
+			if (colors[axis_] == recognize_color)
 			{
-				put_rows.push_front(field_cell.row);
-				put_cols.push_front(field_cell.col);
+				put_rows.push_front(field_cell.row_);
+				put_cols.push_front(field_cell.col_);
 			}
 			else
 			{
-				put_rows.push_back(field_cell.row);
-				put_cols.push_back(field_cell.col);
+				put_rows.push_back(field_cell.row_);
+				put_cols.push_back(field_cell.col_);
 			}
 
 			logger->info("put_nxt p:{} row:{} col:{} color:{}>{}",
 				player_idx_,
-				field_cell.row,
-				field_cell.col,
+				field_cell.row_,
+				field_cell.col_,
 				static_cast<int>(game_color),
 				static_cast<int>(recognize_color));
 		}
 	}
 
 	// ズレが発生した(変化が2箇所でない)場合、現時点では対応しない
-	if (put_rows.size() != nxt_child_max)
+	if (put_rows.size() != nxt_child_max_)
 	{
-		player_mode_ = player_mode::wait_game_end;
+		player_mode_ = PlayerMode::kWaitGameEnd;
 		logger->info("p:{} player_mode:{}", player_idx_, static_cast<int>(player_mode_));
 		return;
 	}
@@ -481,17 +481,17 @@ void player::put_nxt()
 	else
 	{
 		// ズレが発生した(列が離れている)場合、現時点では対応しない
-		player_mode_ = player_mode::wait_game_end;
+		player_mode_ = PlayerMode::kWaitGameEnd;
 		logger->info("p:{} player_mode:{}", player_idx_, static_cast<int>(player_mode_));
 	}
 }
 
-bool player::wait_game_end() const
+bool Player::wait_game_end() const
 {
-	return end_cell_.get_recognize_color() == color::g;
+	return end_cell_.get_recognize_color() == color::kG;
 }
 
-void player::update_all_cells(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)
+void Player::update_all_cells(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)
 {
 	// field
 	for (auto& field_row : field_cells_)
@@ -512,7 +512,7 @@ void player::update_all_cells(const cv::Mat& org_mat, const std::list<cv::Mat>& 
 	update_cell(org_mat, mat_histories, end_cell_);
 }
 
-void player::update_nxt_cells(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)
+void Player::update_nxt_cells(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories)
 {
 	for (auto& nxt_child_cells : nxt_cells_)
 	{
@@ -523,14 +523,14 @@ void player::update_nxt_cells(const cv::Mat& org_mat, const std::list<cv::Mat>& 
 	}
 }
 
-void player::update_cell(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories, cell& target_cell) const
+void Player::update_cell(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_histories, Cell& target_cell) const
 {
 	// 対象領域を取得し、HSVに変換
-	const auto& org_roi = org_mat(target_cell.recognize_rect);
+	const auto& org_roi = org_mat(target_cell.recognize_rect_);
 	cv::Mat org_hsv_mat;
 	cvtColor(org_roi, org_hsv_mat, cv::COLOR_BGR2HSV);
 
-	const auto history_roi = mat_histories.front()(target_cell.recognize_rect);
+	const auto history_roi = mat_histories.front()(target_cell.recognize_rect_);
 	cv::Mat history_hsv_mat;
 	cvtColor(history_roi, history_hsv_mat, cv::COLOR_BGR2HSV);
 
@@ -551,7 +551,7 @@ void player::update_cell(const cv::Mat& org_mat, const std::list<cv::Mat>& mat_h
 	}
 }
 
-void player::write_history() const
+void Player::write_history() const
 {
 	std::ofstream history_file(history_path_, std::ios::app);
 	if (!history_file)
@@ -559,18 +559,18 @@ void player::write_history() const
 		return;
 	}
 
-	unsigned char field_text[rows2 * cols + 1] = {0};
+	unsigned char field_text[rows2_ * cols_ + 1] = {0};
 	to_field_text(field_text);
 
 	history_file
-		<< to_color_text(operation_records_[cur_records_idx_].colors[axis])
-		<< to_color_text(operation_records_[cur_records_idx_].colors[child])
+		<< to_color_text(operation_records_[cur_records_idx_].colors[axis_])
+		<< to_color_text(operation_records_[cur_records_idx_].colors[child_])
 		<< ","
-		<< to_color_text(operation_records_[cur_records_idx_ + 1].colors[axis])
-		<< to_color_text(operation_records_[cur_records_idx_ + 1].colors[child])
+		<< to_color_text(operation_records_[cur_records_idx_ + 1].colors[axis_])
+		<< to_color_text(operation_records_[cur_records_idx_ + 1].colors[child_])
 		<< ","
-		<< to_color_text(operation_records_[cur_records_idx_ + 2].colors[axis])
-		<< to_color_text(operation_records_[cur_records_idx_ + 2].colors[child])
+		<< to_color_text(operation_records_[cur_records_idx_ + 2].colors[axis_])
+		<< to_color_text(operation_records_[cur_records_idx_ + 2].colors[child_])
 		<< ","
 		<< operation_records_[cur_records_idx_].col
 		<< operation_records_[cur_records_idx_].rotate
@@ -580,32 +580,32 @@ void player::write_history() const
 	history_file.close();
 }
 
-unsigned char player::to_color_text(const color from_color)
+unsigned char Player::to_color_text(const color from_color)
 {
 	switch (from_color)
 	{
-	case color::r: return 'R';
-	case color::g: return 'G';
-	case color::b: return 'B';
-	case color::y: return 'Y';
-	case color::p: return 'P';
-	case color::jam: return 'J';
-	case color::none: return '_';
+	case color::kR: return 'R';
+	case color::kG: return 'G';
+	case color::kB: return 'B';
+	case color::kY: return 'Y';
+	case color::kP: return 'P';
+	case color::kJam: return 'J';
+	case color::kNone: return '_';
 	}
 	return '*';
 }
-void player::to_field_text(unsigned char* buffer) const
+void Player::to_field_text(unsigned char* buffer) const
 {
-	for (auto row = 0; row < rows2; row++)
+	for (auto row = 0; row < rows2_; row++)
 	{
-		for (auto col = 0; col < cols; col++)
+		for (auto col = 0; col < cols_; col++)
 		{
-			buffer[row * cols + col] = to_color_text(field_cells_[row][col].get_recognize_color());
+			buffer[row * cols_ + col] = to_color_text(field_cells_[row][col].get_recognize_color());
 		}
 	}
 }
 
-void player::append_game_record() const
+void Player::append_game_record() const
 {
 	std::ofstream game_record_file(game_record_path_, std::ios::app);
 	if (!game_record_file)
@@ -624,12 +624,12 @@ void player::append_game_record() const
 	unsigned char rotate_array[require_nxt_count + 1] = { 0 };
 	for (auto idx = 0; idx < require_nxt_count; idx++)
 	{
-		const auto axis_color = operation_records_[idx].colors[axis];
-		const auto child_color = operation_records_[idx].colors[child];
+		const auto axis_color = operation_records_[idx].colors[axis_];
+		const auto child_color = operation_records_[idx].colors[child_];
 		const auto col = operation_records_[idx].col;
 		const auto rotate = operation_records_[idx].rotate;
-		if (axis_color == color::none ||
-			child_color == color::none ||
+		if (axis_color == color::kNone ||
+			child_color == color::kNone ||
 			col < 0 ||
 			rotate < 0) {
 			game_record_file.close();
@@ -669,9 +669,9 @@ void player::append_game_record() const
 // debug
 // ============================================================
 
-void player::debug_render(const cv::Mat& debug_mat) const
+void Player::debug_render(const cv::Mat& debug_mat) const
 {
-	const auto logger = spdlog::get(logger_main);
+	const auto logger = spdlog::get(kLoggerMain);
 
 	// fieldの線を描画
 	for (const auto& field_row : field_cells_)

@@ -4,44 +4,44 @@
 
 #include "ring_buffer.h"
 
-enum class cell_type
+enum class CellType
 {
-	none = 0,
-	block = 1,
+	kNone = 0,
+	kBlock = 1,
 };
 
 enum class color {
-	r = 0,
-	g = 1,
-	b = 2,
-	y = 3,
-	p = 4,
-	jam = 5,
-	none = 6,
+	kR = 0,
+	kG = 1,
+	kB = 2,
+	kY = 3,
+	kP = 4,
+	kJam = 5,
+	kNone = 6,
 };
 
-class cell
+class Cell
 {
 public:
-	static constexpr int b = 0;
-	static constexpr int g = 1;
-	static constexpr int r = 2;
+	static constexpr int b_ = 0;
+	static constexpr int g_ = 1;
+	static constexpr int r_ = 2;
 
-	static constexpr int h = 0;
-	static constexpr int s = 1;
-	static constexpr int v = 2;
+	static constexpr int h_ = 0;
+	static constexpr int s_ = 1;
+	static constexpr int v_ = 2;
 
-	cell();
+	Cell();
 
-	cell_type type;
+	CellType type_;
 
-	int row;
-	int col;
+	int row_;
+	int col_;
 
-	cv::Rect frame_rect;
-	cv::Rect recognize_rect;
+	cv::Rect frame_rect_;
+	cv::Rect recognize_rect_;
 
-	color game_color;
+	color game_color_;
 
 	void set_rect(cv::Rect in_rect);
 
@@ -63,7 +63,7 @@ private:
 	const int mse_threshold_ = 170;
 
 	color recognize_color_;
-	ring_buffer mse_ring_buffer_;
+	RingBuffer mse_ring_buffer_;
 
 	int stabilize_count_;
 

@@ -1,2 +1,2 @@
 #pragma once
-constexpr auto thread_sleep_ms = 100;
+constexpr auto kThreadSleepMs = 100;

@@ -3,7 +3,7 @@
 
 #include "cell.h"
 
-class color_map
+class ColorMap
 {
 	std::map<color, unsigned char> map_;
 
