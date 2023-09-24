@@ -353,7 +353,7 @@ void Player::wait_nxt_stabilize()
 	// 2P側の画面更新が遅れる事があるため、nxt更新→配置出力を少し遅らせる
 	if (put_nxt_wait_frames_ > 0)
 	{
-		if (put_nxt_wait_frames_ >= 2)
+		if (put_nxt_wait_frames_ >= 3)
 		{
 			put_nxt_wait_frames_ = 0;
 			put_nxt();

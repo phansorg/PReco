@@ -121,7 +121,7 @@ bool Cell::is_stabilizing() const
 
 bool Cell::is_stabilized() const
 {
-	return stabilize_count_ >= 2;
+	return stabilize_count_ >= 3;
 }
 
 void Cell::debug_render(const cv::Mat& debug_mat) const
