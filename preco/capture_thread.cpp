@@ -69,7 +69,8 @@ void CaptureThread::read_jpeg()
 
 		// jpegファイル名
 		std::ostringstream zero_padding;
-		zero_padding << std::setfill('0') << std::setw(jpeg_file_zero_count_) << cur_no_ << ".jpg";
+		//zero_padding << std::setfill('0') << std::setw(jpeg_file_zero_count_) << cur_no_ << ".jpg";
+		zero_padding << cur_no_ << ".jpg";
 
 		// ディレクトリパスとjpegファイル名を結合
 		std::filesystem::path file_path = path_;

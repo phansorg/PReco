@@ -30,8 +30,8 @@ void Settings::init()
     // 設定ファイルが存在しない場合、デフォルト値で作成
 	json_["capture_mode"] = CaptureMode::kJpeg;
     json_["capture_path"] = "D:/puyo/movie/image_target";
-    json_["capture_start_no"] = 0;
-    //json["capture_start_no"] = 6000;
+    //json_["capture_start_no"] = 1;
+    json_["capture_start_no"] = 3268;
     json_["capture_last_no"] = 11085;
 
     json_["log_path"] = "D:/puyo/movie/logs/log.txt";
@@ -39,7 +39,7 @@ void Settings::init()
     json_["player_history_dir"] = "D:/puyo/movie/history";
 
 	// ぷよの左端
-    json_["player_field_x"] = { 231, 894 };
+    json_["player_field_x"] = { 232, 894 };
     // フィールドの上端
     json_["player_field_y"] = 309;
     // ぷよの右端まで
@@ -53,7 +53,7 @@ void Settings::init()
     json_["player_nxt1_y"] = 312;
 
     // ネクネクの左端
-    json_["player_nxt2_x"] = { 567, 784 };
+    json_["player_nxt2_x"] = { 567, 786 };
     // ネクネクの上端
     json_["player_nxt2_y"] = 403;
 
@@ -64,8 +64,8 @@ void Settings::init()
 
     json_["game_debug_write"] = true;
     json_["game_debug_path"] = "D:/puyo/movie/image_debug";
-    json_["game_start_mode"] = GameMode::kWaitCharacterSelection;
-    //json["game_start_mode"] = game_mode::wait_game_reset;
+    //json_["game_start_mode"] = GameMode::kWaitCharacterSelection;
+    json_["game_start_mode"] = GameMode::kWaitGameReset;
 
     std::ofstream ofs(settings_file_name);
     ofs << std::setw(json_indent) << json_ << std::endl;
