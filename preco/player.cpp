@@ -240,6 +240,8 @@ bool Player::wait_game_reset(const cv::Mat& org_mat)
 
 	color_map_.reset();
 
+	put_nxt_wait_frames_ = 0;
+
 	// 試合数を加算
 	game_no_++;
 
@@ -348,12 +350,35 @@ void Player::game_end()
 
 void Player::wait_nxt_stabilize()
 {
+	// 2P側の画面更新が遅れる事があるため、nxt更新→配置出力を少し遅らせる
+	if (put_nxt_wait_frames_ > 0)
+	{
+		if (put_nxt_wait_frames_ >= 2)
+		{
+			put_nxt_wait_frames_ = 0;
+			put_nxt();
+			write_history();
+		}
+		else
+		{
+			put_nxt_wait_frames_++;
+		}
+	}
+
 	for (auto& nxt_child_cells : nxt_cells_)
 	{
 		for (auto& nxt_cell : nxt_child_cells)
 		{
 			if (!nxt_cell.is_stabilized()) return;
 		}
+	}
+
+	// 2P側の画面更新が遅れる事があるため、nxt更新→配置出力を少し遅らせる
+	if (put_nxt_wait_frames_ > 0)
+	{
+		put_nxt_wait_frames_ = 0;
+		put_nxt();
+		write_history();
 	}
 
 	const Operation operation_record{
@@ -388,16 +413,28 @@ bool Player::wait_combo()
 
 void Player::wait_nxt_change()
 {
+	auto nxt_change_count = 0;
 	for (auto& nxt_child_cells : nxt_cells_)
 	{
 		for (auto& nxt_cell : nxt_child_cells)
 		{
-			if (nxt_cell.is_stabilized()) return;
+			// 2P側のネクストがアニメーションせず入れ替わる事があった
+			// 3個入れ替わるだけで変更判定として、救える確率を上げる
+			if (nxt_cell.is_stabilized())
+			{
+				if (nxt_change_count >= 1)
+				{
+					return;
+				}
+				else
+				{
+					nxt_change_count++;
+				}
+			}
 		}
 	}
 
-	put_nxt();
-	write_history();
+	put_nxt_wait_frames_ = 1;
 
 	const auto logger = spdlog::get(kLoggerMain);
 	player_mode_ = PlayerMode::kWaitNxtStabilize;

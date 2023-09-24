@@ -63,6 +63,8 @@ private:
 
 	ColorMap color_map_;
 
+	int put_nxt_wait_frames_;
+
 public:
 	explicit Player(int player_idx);
 
