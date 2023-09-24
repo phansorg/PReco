@@ -80,8 +80,8 @@ void Cell::update_recognize_color(const cv::Scalar& bgr_scalar)
 
 	const auto logger = spdlog::get(kLoggerMain);
 	SPDLOG_LOGGER_TRACE(logger, "row:{} col:{} r:{} g:{} b:{} color:{}",
-		row,
-		col,
+		row_,
+		col_,
 		static_cast<int>(r_val),
 		static_cast<int>(g_val),
 		static_cast<int>(b_val),

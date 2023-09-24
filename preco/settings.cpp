@@ -10,7 +10,7 @@ constexpr auto json_indent = 4;
 
 Settings* Settings::instance_ = nullptr;
 #ifdef _DEBUG
-bool settings::debug = true;
+bool Settings::debug_ = true;
 #else
 bool Settings::debug_ = false;
 #endif
@@ -30,7 +30,7 @@ void Settings::init()
     // 設定ファイルが存在しない場合、デフォルト値で作成
 	json_["capture_mode"] = CaptureMode::kJpeg;
     json_["capture_path"] = "D:/puyo/movie/image_target";
-    json_["capture_start_no"] = 4210;
+    json_["capture_start_no"] = 0;
     //json["capture_start_no"] = 6000;
     json_["capture_last_no"] = 11085;
 
@@ -39,28 +39,28 @@ void Settings::init()
     json_["player_history_dir"] = "D:/puyo/movie/history";
 
 	// ぷよの左端
-    json_["player_field_x"] = { 186, 837 };
+    json_["player_field_x"] = { 231, 894 };
     // フィールドの上端
-    json_["player_field_y"] = 106;
+    json_["player_field_y"] = 309;
     // ぷよの右端まで
-    json_["player_field_w"] = 258;
+    json_["player_field_w"] = 264;
     // フィールドの下端まで
-    json_["player_field_h"] = 480;
+    json_["player_field_h"] = 486;
 
     // ネクストの左端
-	json_["player_nxt1_x"] = { 479, 757 };
+	json_["player_nxt1_x"] = { 532, 815 };
     // ネクストの上端
-    json_["player_nxt1_y"] = 109;
+    json_["player_nxt1_y"] = 312;
 
     // ネクネクの左端
-    json_["player_nxt2_x"] = { 514, 732 };
+    json_["player_nxt2_x"] = { 567, 784 };
     // ネクネクの上端
-    json_["player_nxt2_y"] = 196;
+    json_["player_nxt2_y"] = 403;
 
     // スコア最上位0の左端
-	json_["player_score_x"] = { 234, 833 };
+	json_["player_score_x"] = { 282, 891 };
     // スコア最上位0の上端
-	json_["player_score_y"] = 589;
+	json_["player_score_y"] = 799;
 
     json_["game_debug_write"] = true;
     json_["game_debug_path"] = "D:/puyo/movie/image_debug";

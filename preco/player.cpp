@@ -699,10 +699,10 @@ void Player::debug_render(const cv::Mat& debug_mat) const
 	// nxt‚Ìmse
 	SPDLOG_LOGGER_TRACE(logger, "game p:{} mse1:{} mse2:{} mse3:{} mse4:{}",
 		player_idx_,
-		nxt_cells_[0][axis].get_mse(),
-		nxt_cells_[0][child].get_mse(),
-		nxt_cells_[1][axis].get_mse(),
-		nxt_cells_[1][child].get_mse()
+		nxt_cells_[0][axis_].get_mse(),
+		nxt_cells_[0][child_].get_mse(),
+		nxt_cells_[1][axis_].get_mse(),
+		nxt_cells_[1][child_].get_mse()
 	);
 }
 
