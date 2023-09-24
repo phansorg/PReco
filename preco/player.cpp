@@ -382,7 +382,7 @@ bool Player::wait_combo()
 	// 消した後は、現時点では対応しない
 	const auto logger = spdlog::get(kLoggerMain);
 	player_mode_ = PlayerMode::kWaitGameEnd;
-	logger->info("p:{} player_mode:{}", player_idx_, static_cast<int>(player_mode_));
+	logger->info("[Player::wait_combo] p:{} player_mode:{}", player_idx_, static_cast<int>(player_mode_));
 	return true;
 }
 
@@ -450,7 +450,7 @@ void Player::put_nxt()
 	if (put_rows.size() != nxt_child_max_)
 	{
 		player_mode_ = PlayerMode::kWaitGameEnd;
-		logger->info("p:{} player_mode:{}", player_idx_, static_cast<int>(player_mode_));
+		logger->info("[Player::put_nxt]1 p:{} player_mode:{}", player_idx_, static_cast<int>(player_mode_));
 		return;
 	}
 
@@ -482,7 +482,7 @@ void Player::put_nxt()
 	{
 		// ズレが発生した(列が離れている)場合、現時点では対応しない
 		player_mode_ = PlayerMode::kWaitGameEnd;
-		logger->info("p:{} player_mode:{}", player_idx_, static_cast<int>(player_mode_));
+		logger->info("[Player::put_nxt]2 p:{} player_mode:{}", player_idx_, static_cast<int>(player_mode_));
 	}
 }
 
