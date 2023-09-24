@@ -150,10 +150,12 @@ void game_thread::wait_game_reset(const cv::Mat& org_mat)
 
 void game_thread::wait_game_init(const cv::Mat& org_mat)
 {
+	auto init_ok = true;
 	for (const auto& player : players_)
 	{
-		if (!player->wait_game_init(org_mat, mat_histories_)) return;
+		init_ok &= player->wait_game_init(org_mat, mat_histories_);
 	}
+	if (!init_ok) return;
 
 	if (first_game_)
 	{
