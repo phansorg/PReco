@@ -419,10 +419,10 @@ void Player::wait_nxt_change()
 		for (auto& nxt_cell : nxt_child_cells)
 		{
 			// 2P側のネクストがアニメーションせず入れ替わる事があった
-			// 3個入れ替わるだけで変更判定として、救える確率を上げる
+			// 2個入れ替わるだけで変更判定として、救える確率を上げる
 			if (nxt_cell.is_stabilized())
 			{
-				if (nxt_change_count >= 1)
+				if (nxt_change_count >= 2)
 				{
 					return;
 				}

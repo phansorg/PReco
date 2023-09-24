@@ -37,10 +37,11 @@ void Cell::set_rect(const cv::Rect in_rect)
 		break;
 
 	case CellType::kBlock:
-		recognize_rect_.x = frame_rect_.x + frame_rect_.width /10;
-		recognize_rect_.y = frame_rect_.y + frame_rect_.height / 10;
-		recognize_rect_.width = frame_rect_.width * 4 / 5;
-		recognize_rect_.height = frame_rect_.height * 4 / 5;
+		// ぷよ全般
+		recognize_rect_.x = frame_rect_.x + frame_rect_.width * 15 / 100;
+		recognize_rect_.y = frame_rect_.y + frame_rect_.height * 15 / 100;
+		recognize_rect_.width = frame_rect_.width * 70 / 100;
+		recognize_rect_.height = frame_rect_.height * 70 / 100;
 		break;
 	}
 
@@ -70,7 +71,7 @@ void Cell::update_recognize_color(const cv::Scalar& bgr_scalar)
 		recognize_color = color::kG;
 	else if (r_val < 140 && g_val < 160 && b_val > 170)
 		recognize_color = color::kB;
-	else if (r_val > 190 && g_val > 173 && b_val < 150)
+	else if (r_val > 189 && g_val > 171 && b_val < 150)
 		recognize_color = color::kY;
 	else if (r_val > 140 && g_val < 140 && b_val > 170)
 		recognize_color = color::kP;
@@ -121,7 +122,7 @@ bool Cell::is_stabilizing() const
 
 bool Cell::is_stabilized() const
 {
-	return stabilize_count_ >= 3;
+	return stabilize_count_ >= stabilized_threshold_count_;
 }
 
 void Cell::debug_render(const cv::Mat& debug_mat) const

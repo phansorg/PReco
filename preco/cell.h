@@ -7,7 +7,7 @@
 enum class CellType
 {
 	kNone = 0,
-	kBlock = 1,
+	kBlock = 1, // ぷよ全般
 };
 
 enum class color {
@@ -43,6 +43,8 @@ public:
 
 	color game_color_;
 
+	int stabilized_threshold_count_ = 3;
+
 	void set_rect(cv::Rect in_rect);
 
 	void reset();
@@ -60,7 +62,7 @@ public:
 	void render_rect(const cv::Mat& debug_mat, cv::Rect rect, const cv::Scalar& bgr_scalar) const;
 
 private:
-	const int mse_threshold_ = 170;
+	const int mse_threshold_ = 225;
 
 	color recognize_color_;
 	RingBuffer mse_ring_buffer_;
