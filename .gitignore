@@ -458,3 +458,6 @@ preco/include/nlohmann
 preco/include/opencv2
 preco/include/spdlog
 preco/lib/opencv
+
+# setting
+settings.json
