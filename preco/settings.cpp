@@ -40,7 +40,7 @@ void Settings::init()
     json_["player_history_dir"] = "D:/puyo/movie/history";
 
 	// ぷよの左端
-    json_["player_field_x"] = { 232, 894 };
+    json_["player_field_x"] = { 220, 886 };
     // フィールドの上端
     json_["player_field_y"] = 309;
     // ぷよの右端まで
@@ -49,17 +49,17 @@ void Settings::init()
     json_["player_field_h"] = 486;
 
     // ネクストの左端
-	json_["player_nxt1_x"] = { 532, 815 };
+	json_["player_nxt1_x"] = { 522, 805 };
     // ネクストの上端
-    json_["player_nxt1_y"] = 314;
+    json_["player_nxt1_y"] = 312;
 
     // ネクネクの左端
-    json_["player_nxt2_x"] = { 567, 786 };
+    json_["player_nxt2_x"] = { 558, 779 };
     // ネクネクの上端
-    json_["player_nxt2_y"] = 404;
+    json_["player_nxt2_y"] = 401;
 
     // スコア最上位0の左端
-	json_["player_score_x"] = { 282, 891 };
+	json_["player_score_x"] = { 274, 883 };
     // スコア最上位0の上端
 	json_["player_score_y"] = 799;
 
@@ -67,6 +67,8 @@ void Settings::init()
     json_["game_debug_path"] = "D:/puyo/movie/image_debug";
     json_["game_start_mode"] = GameMode::kWaitCharacterSelection;
     //json_["game_start_mode"] = GameMode::kWaitGameReset;
+
+    json_["cell_debug_path"] = "D:/puyo/movie/image_debug_cell";
 
     std::ofstream ofs(settings_file_name);
     ofs << std::setw(json_indent) << json_ << std::endl;

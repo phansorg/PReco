@@ -1,7 +1,10 @@
 ﻿#include "cell.h"
 
+#include <filesystem>
+#include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 
+#include "debug_writer.h"
 #include "logger.h"
 #include "settings.h"
 
@@ -18,6 +21,9 @@ Cell::Cell()
 	recognize_color_ = color::kNone;
 	mse_ring_buffer_ = RingBuffer(Settings::mse_init_, Settings::history_max_);
 	stabilize_count_ = 0;
+
+	auto& json = Settings::get_instance()->json_;
+	debug_path_ = json["cell_debug_path"].get<std::string>();
 }
 
 void Cell::set_rect(const cv::Rect in_rect)
@@ -127,6 +133,25 @@ bool Cell::is_stabilized() const
 
 void Cell::debug_render(const cv::Mat& debug_mat) const
 {
+	//if (recognize_color_ != color::kNone && type_ == CellType::kBlock)
+	if (type_ == CellType::kBlock)
+	{
+		// 画像切り出し
+		std::ostringstream file_name;
+		auto class_id = static_cast<int>(recognize_color_);
+		file_name << class_id << "/" << class_id << "_" << debug_writer::seq_++ << ".png";
+		if (debug_writer::seq_ % 13 == 0)
+		{
+			// ディレクトリパスと出力ファイル名を結合
+			std::filesystem::path file_path = debug_path_;
+			file_path.append(file_name.str());
+
+			// ファイル出力
+			cv::Mat roi_image(debug_mat, cv::Rect(frame_rect_.x, frame_rect_.y, frame_rect_.width, frame_rect_.height));
+			cv::imwrite(file_path.string(), roi_image);
+		}
+	}
+
 	// frame_rect
 	cv::Scalar bgr_scalar;
 	switch (recognize_color_)

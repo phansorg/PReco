@@ -69,4 +69,5 @@ private:
 
 	int stabilize_count_;
 
+	std::string debug_path_;
 };

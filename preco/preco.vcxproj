@@ -142,6 +142,7 @@
     <ClCompile Include="capture_thread.cpp" />
     <ClCompile Include="cell.cpp" />
     <ClCompile Include="color_map.cpp" />
+    <ClCompile Include="debug_writer.cpp" />
     <ClCompile Include="logger.cpp" />
     <ClCompile Include="player.cpp" />
     <ClCompile Include="preco.cpp" />
@@ -154,6 +155,7 @@
     <ClInclude Include="capture_thread.h" />
     <ClInclude Include="cell.h" />
     <ClInclude Include="color_map.h" />
+    <ClInclude Include="debug_writer.h" />
     <ClInclude Include="logger.h" />
     <ClInclude Include="player.h" />
     <ClInclude Include="game_thread.h" />
